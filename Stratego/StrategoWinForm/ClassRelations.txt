@@ -1,0 +1,15 @@
+﻿
+
+The computer and person playing are the Actors
+
+
+A BOARD is a state of the game
+A TURN *could* be the 
+
+A GAME has the collection of the pieces, the current and possible boards, and the calculations for the heuristics
+a single play through
+
+A SESSION is a collection of games with all the same rules
+
+
+
