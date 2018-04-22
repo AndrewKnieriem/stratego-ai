@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameCore", "GameCore\GameCo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrategoWinForm", "StrategoWinForm\StrategoWinForm.csproj", "{693D87BD-9A89-44C8-86E0-03B2E5AA77AC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{22A0E20E-3FC3-4AB4-A7BA-338AC85CCAEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{693D87BD-9A89-44C8-86E0-03B2E5AA77AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{693D87BD-9A89-44C8-86E0-03B2E5AA77AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{693D87BD-9A89-44C8-86E0-03B2E5AA77AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22A0E20E-3FC3-4AB4-A7BA-338AC85CCAEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22A0E20E-3FC3-4AB4-A7BA-338AC85CCAEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22A0E20E-3FC3-4AB4-A7BA-338AC85CCAEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22A0E20E-3FC3-4AB4-A7BA-338AC85CCAEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

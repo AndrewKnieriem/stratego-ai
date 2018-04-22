@@ -19,6 +19,15 @@ namespace GameCore
             CalculateBattleOutcome = (PieceType p) => DetermineWinner(p);
         }
 
+        public PieceType(string name, int rank, string symbolforboard)
+        {
+            Name = name;
+            Rank = rank;
+            SymbolForBoard = symbolforboard;
+
+            CalculateBattleOutcome = (PieceType p) => DetermineWinner(p);
+        }
+
         public Func<PieceType, GameRules.MoveOutcomes> CalculateBattleOutcome;
 
         public virtual GameRules.MoveOutcomes DetermineWinner(PieceType opponent)

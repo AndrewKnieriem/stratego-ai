@@ -15,6 +15,7 @@ namespace StrategoConsole
 
         static void Main(string[] args)
         {
+
             // Define the simulation, board, pieces, players, and rules
             Stopwatch fullProgramTime = Stopwatch.StartNew();
 
@@ -95,7 +96,21 @@ namespace StrategoConsole
             fullProgramTime.Stop();
 
             Console.WriteLine("------------------------- DONE in " + fullProgramTime.Elapsed.ToReadable() + "----------------------------");
+
+
+
             
+
+
+
+
+
+
+
+
+
+
+
 
             Console.WriteLine("Press <enter> to continue");
             Console.ReadLine();

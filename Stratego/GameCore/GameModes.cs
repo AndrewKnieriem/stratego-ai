@@ -10,26 +10,13 @@ namespace GameCore
     {
         public static Game classicStratego()
         {
-            Player playerHuman = new Player()
-            {
-                FriendlyName = "Human",
-                FriendlySymbol = "H",
-            };
-
-            Player playerComputer = new Player()
-            {
-                FriendlyName = "CPU",
-                FriendlySymbol = "C",
-            };
-
-            PieceType pieceTypePawn = new PieceType()
-            {
-                Name = "Pawn",
-                Rank = 1,
-                SymbolForBoard = "1",
-            };
-
+            
             LocationType _____Space = new LocationType();
+            LocationType startSpace = new LocationType()
+            {
+                StarterPlace = true,
+            };
+
             LocationType waterSpace = new LocationType()
             {
                 Passable = false,
@@ -38,6 +25,21 @@ namespace GameCore
 
             int pieceCount = 0;
             List<Piece> pieces = new List<Piece>();
+            
+            var arsenal = new List<GameRules.Arsenal>()
+            {
+                // min, max, and start define the range of pieces a player can place to start the game
+                new GameRules.Arsenal(0, 10, 10, playerOne, pieceType1),
+                new GameRules.Arsenal(0, 10, 10, playerOne, pieceType2),
+                new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeFlag),
+
+                new GameRules.Arsenal(0, 10, 1, PlayerTwo, pieceType1),
+                new GameRules.Arsenal(0, 10, 1, PlayerTwo, pieceType2),
+                new GameRules.Arsenal(0, 1, 1, PlayerTwo, pieceTypeFlag),
+            };
+
+
+
 
             // populate the human player's pieces
             for (int y = 6; y < 10; y++)
@@ -46,8 +48,8 @@ namespace GameCore
                     pieces.Add(new Piece(x, y)
                     {
                         IsRevealed = false,
-                        Owner = playerHuman,
-                        Type = pieceTypePawn,
+                        Owner = playerOne,
+                        Type = pieceType1,
                     });
                     pieceCount++;
                 }
@@ -59,38 +61,22 @@ namespace GameCore
                     pieces.Add(new Piece(x, y)
                     {
                         IsRevealed = false,
-                        Owner = playerComputer,
-                        Type = pieceTypePawn,
+                        Owner = PlayerTwo,
+                        Type = pieceType1,
                     });
                     pieceCount++;
                 }
 
+
+
             GameRules rules = new GameRules(
 
-                _arsenal: new List<GameRules.Arsenal>()
-                {
-                    new GameRules.Arsenal()
-                    {
-                        CountMax = 20,
-                        CountMin = 0,
-                        CountStart = 20,
-                        Owner = playerHuman,
-                        Type = pieceTypePawn,
-                    },
-                    new GameRules.Arsenal()
-                    {
-                        CountMax = 20,
-                        CountMin = 0,
-                        CountStart = 20,
-                        Owner = playerComputer,
-                        Type = pieceTypePawn,
-                    }
-                },
+                _arsenal: arsenal,
 
                 _players: new List<Player>()
                 {
-                    playerHuman,
-                    playerComputer
+                    playerOne,
+                    PlayerTwo
                 },
 
                 _startingBoard: new Board()
@@ -100,16 +86,16 @@ namespace GameCore
                     LocationsLayout = new[,]
                     {
                         // x, y     so first row is actually the first column
-                        {_____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space},
-                        {_____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space},
-                        {_____Space, _____Space, _____Space, _____Space, waterSpace, waterSpace, _____Space, _____Space, _____Space, _____Space},
-                        {_____Space, _____Space, _____Space, _____Space, waterSpace, waterSpace, _____Space, _____Space, _____Space, _____Space},
-                        {_____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space},
-                        {_____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space},
-                        {_____Space, _____Space, _____Space, _____Space, waterSpace, waterSpace, _____Space, _____Space, _____Space, _____Space},
-                        {_____Space, _____Space, _____Space, _____Space, waterSpace, waterSpace, _____Space, _____Space, _____Space, _____Space},
-                        {_____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space},
-                        {_____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space, _____Space},
+                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
+                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
+                        {startSpace, startSpace, startSpace, _____Space, waterSpace, waterSpace, _____Space, startSpace, startSpace, startSpace},
+                        {startSpace, startSpace, startSpace, _____Space, waterSpace, waterSpace, _____Space, startSpace, startSpace, startSpace},
+                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
+                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
+                        {startSpace, startSpace, startSpace, _____Space, waterSpace, waterSpace, _____Space, startSpace, startSpace, startSpace},
+                        {startSpace, startSpace, startSpace, _____Space, waterSpace, waterSpace, _____Space, startSpace, startSpace, startSpace},
+                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
+                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
                     },
                     PiecesLayout = new Piece[10, 10],
                     PieceSet = pieces,
@@ -140,19 +126,19 @@ namespace GameCore
                 _arsenal: new List<GameRules.Arsenal>()
                 {
                     // min, max, and start define the range of pieces a player can place to start the game
-                    new GameRules.Arsenal(0, 1, 1, playerHuman, pieceTypePawn1),
-                    new GameRules.Arsenal(0, 1, 1, playerHuman, pieceTypePawn2),
-                    new GameRules.Arsenal(0, 1, 1, playerHuman, pieceTypeFlag),
+                    new GameRules.Arsenal(0, 1, 1, playerOne, pieceType1),
+                    new GameRules.Arsenal(0, 1, 1, playerOne, pieceType2),
+                    new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeFlag),
 
-                    new GameRules.Arsenal(0, 1, 1, playerComputer, pieceTypePawn1),
-                    new GameRules.Arsenal(0, 1, 1, playerComputer, pieceTypePawn2),
-                    new GameRules.Arsenal(0, 1, 1, playerComputer, pieceTypeFlag),
+                    new GameRules.Arsenal(0, 1, 1, PlayerTwo, pieceType1),
+                    new GameRules.Arsenal(0, 1, 1, PlayerTwo, pieceType2),
+                    new GameRules.Arsenal(0, 1, 1, PlayerTwo, pieceTypeFlag),
                 },
 
                 _players: new List<Player>()
                 {
-                    playerHuman,
-                    playerComputer
+                    playerOne,
+                    PlayerTwo
                 },
 
                 _startingBoard: new Board()
@@ -174,13 +160,13 @@ namespace GameCore
                          * [  +1  ,      ,  -1 ]
                          * [  +f  ,  +2  ,     ]
                          */
-                        new Piece(0, 0, playerHuman, pieceTypeFlag),
-                        new Piece(1, 0, playerHuman, pieceTypePawn2),
-                        new Piece(0, 1, playerHuman, pieceTypePawn1),
+                        new Piece(0, 0, playerOne, pieceTypeFlag),
+                        new Piece(1, 0, playerOne, pieceType2),
+                        new Piece(0, 1, playerOne, pieceType1),
 
-                        new Piece(2, 1, playerComputer, pieceTypePawn1),
-                        new Piece(1, 2, playerComputer, pieceTypePawn2),
-                        new Piece(2, 2, playerComputer, pieceTypeFlag)
+                        new Piece(2, 1, PlayerTwo, pieceType1),
+                        new Piece(1, 2, PlayerTwo, pieceType2),
+                        new Piece(2, 2, PlayerTwo, pieceTypeFlag)
                     }
                 }
             )
@@ -246,41 +232,36 @@ namespace GameCore
 
 
         #region Common components
-        public static Player playerHuman = new Player()
+        public static Player playerOne = new Player()
         {
-            FriendlyName = "Human",
+            FriendlyName = "Player 1",
             FriendlySymbol = "+",
             Controller = new Controllers.RandomController(),
         };
 
-        public static Player playerComputer = new Player()
+        public static Player PlayerTwo = new Player()
         {
-            FriendlyName = "CPU",
+            FriendlyName = "Player 2",
             FriendlySymbol = "-",
             Controller = new Controllers.RandomController(),
         };
 
-        public static PieceType pieceTypePawn1 = new PieceType()
-        {
-            Name = "Pawn1",
-            Rank = 1,
-            SymbolForBoard = "1",
-        };
+        public static PieceType pieceType1 = new PieceType("Pawn1", 1, "1");
+        public static PieceType pieceType2 = new PieceType("Pawn2", 2, "2");
+        public static PieceType pieceType3 = new PieceType("Pawn3", 3, "3");
+        public static PieceType pieceType4 = new PieceType("Pawn4", 4, "4");
+        public static PieceType pieceType5 = new PieceType("Pawn5", 5, "5");
+        public static PieceType pieceType6 = new PieceType("Pawn6", 6, "6");
+        public static PieceType pieceType7 = new PieceType("Pawn7", 7, "7");
+        public static PieceType pieceType8 = new PieceType("Pawn8", 8, "8");
+        public static PieceType pieceType9 = new PieceType("Pawn9", 9, "9");
+        public static PieceType pieceTypeM = new PieceType("Marshall", 10, "M");
 
-        public static PieceType pieceTypePawn2 = new PieceType()
+        public static PieceType pieceTypeFlag = new PieceType("Flag", 0, "F")
         {
-            Name = "Pawn2",
-            Rank = 2,
-            SymbolForBoard = "2",
-        };
-
-        public static PieceType pieceTypeFlag = new PieceType()
-        {
-            Name = "Flag",
-            Rank = 0,
-            SymbolForBoard = "F",
             Movable = false,
         };
+
         #endregion
     }
 }
