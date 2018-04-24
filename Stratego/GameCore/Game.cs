@@ -223,6 +223,8 @@ namespace GameCore
             public List<Player> Winners;
             public int turnsElapsed;
             public TimeSpan timeElapsed;
+            
+            public string ToCSV() => $"{turnsElapsed},{timeElapsed.Milliseconds},{(String.Join("|",Winners.Select(x=>x.FriendlyName)))}";
         }
 
 }

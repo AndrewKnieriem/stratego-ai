@@ -14,13 +14,19 @@ namespace Tests
         {
             CompareWins();
         }
-
-
-
-
+        
         static void CompareWins()
         {
+            Console.WriteLine("Starting simulations, please wait...");
             Stopwatch totalTime = Stopwatch.StartNew();
+
+            StringBuilder csv = new StringBuilder();
+            string sessionName = "Mode-Classic_Agents-2Random_Turns-2000_Games-10000";
+
+            // csv headers
+            csv.AppendLine("Session,Game,Turns,Elapsed,Winners");
+
+            string SessionTimestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
             int countP1Wins = 0;
             int countDraws = 0;
@@ -54,21 +60,24 @@ namespace Tests
                     countDraws++;
                 else if (results.Winners.Contains(GameModes.playerOne))
                     countP1Wins++;
-                
-                
 
-                Console.WriteLine($"Wins: {countP1Wins}/{i} ({(Math.Round((countP1Wins / (float)i) * 100, 1))}%)" +
-                                  $" Turns: {results.turnsElapsed}, Time: {results.timeElapsed.ToReadable()}");
+                lock(statslock)
+                    csv.AppendLine($"{SessionTimestamp},{i},{results.ToCSV()}");
+
+                //Console.WriteLine($"Wins: {countP1Wins}/{i} ({(Math.Round((countP1Wins / (float)i) * 100, 1))}%)" +
+                //                  $" Turns: {results.turnsElapsed}, Time: {results.timeElapsed.ToReadable()}");
             });
 
-            for (int i = 0; i < maxGames; i++)
-            {
-               
-            }
+
+            
 
             Console.WriteLine($"---  Sim complete, {maxGames} evaluated. Total Time: {totalTime.Elapsed.ToReadable()}");
-            Console.WriteLine($"Wins: {countP1Wins}, Draws: {countDraws}");
+            Console.WriteLine($"Wins: {countP1Wins} ({(Math.Round((countP1Wins / (float)maxGames) * 100, 1))}%), Draws: {countDraws}");
 
+            string logfilename = $"Session_{sessionName}_{SessionTimestamp}.csv";
+            System.IO.File.WriteAllText(logfilename,csv.ToString());
+            Console.WriteLine("Wrote log to " + logfilename);
+            
             Console.WriteLine("Press <enter> to quit...");
             Console.ReadLine();
         }
