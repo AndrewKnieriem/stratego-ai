@@ -14,7 +14,7 @@ namespace GameCore
         public bool Passable { get; set; } = true;
 
         // allows player to use this location as a starting point for their piece
-        public bool StarterPlace { get; set; } = false; 
+        public Player StarterPlace { get; set; } = null; 
 
 
         // example attributes for locations for more complex games

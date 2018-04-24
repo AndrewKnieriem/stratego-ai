@@ -10,11 +10,15 @@ namespace GameCore
     {
         public static Game classicStratego()
         {
-            
+
             LocationType _____Space = new LocationType();
-            LocationType startSpace = new LocationType()
+            LocationType plyr1Space = new LocationType()
             {
-                StarterPlace = true,
+                StarterPlace = playerOne,
+            };
+            LocationType plyr2Space = new LocationType()
+            {
+                StarterPlace = playerTwo,
             };
 
             LocationType waterSpace = new LocationType()
@@ -26,86 +30,155 @@ namespace GameCore
             int pieceCount = 0;
             List<Piece> pieces = new List<Piece>();
             
-            var arsenal = new List<GameRules.Arsenal>()
+            var Arsenal = new List<GameRules.Arsenal>()
             {
                 // min, max, and start define the range of pieces a player can place to start the game
-                new GameRules.Arsenal(0, 10, 10, playerOne, pieceType1),
-                new GameRules.Arsenal(0, 10, 10, playerOne, pieceType2),
                 new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeFlag),
+                new GameRules.Arsenal(0, 7, 7, playerOne, pieceType1), // bombs + spies
+                new GameRules.Arsenal(0, 8, 8, playerOne, pieceType2),
+                new GameRules.Arsenal(0, 5, 5, playerOne, pieceType3),
+                new GameRules.Arsenal(0, 4, 4, playerOne, pieceType4),
+                new GameRules.Arsenal(0, 4, 4, playerOne, pieceType4),
+                new GameRules.Arsenal(0, 4, 4, playerOne, pieceType6),
+                new GameRules.Arsenal(0, 3, 3, playerOne, pieceType7),
+                new GameRules.Arsenal(0, 2, 2, playerOne, pieceType8),
+                new GameRules.Arsenal(0, 1, 1, playerOne, pieceType9),
+                new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeM),
 
-                new GameRules.Arsenal(0, 10, 1, PlayerTwo, pieceType1),
-                new GameRules.Arsenal(0, 10, 1, PlayerTwo, pieceType2),
-                new GameRules.Arsenal(0, 1, 1, PlayerTwo, pieceTypeFlag),
+                new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeFlag),
+                new GameRules.Arsenal(0, 7, 7, playerTwo, pieceType1), // bombs + spies
+                new GameRules.Arsenal(0, 8, 8, playerTwo, pieceType2),
+                new GameRules.Arsenal(0, 5, 5, playerTwo, pieceType3),
+                new GameRules.Arsenal(0, 4, 4, playerTwo, pieceType4),
+                new GameRules.Arsenal(0, 4, 4, playerTwo, pieceType4),
+                new GameRules.Arsenal(0, 4, 4, playerTwo, pieceType6),
+                new GameRules.Arsenal(0, 3, 3, playerTwo, pieceType7),
+                new GameRules.Arsenal(0, 2, 2, playerTwo, pieceType8),
+                new GameRules.Arsenal(0, 1, 1, playerTwo, pieceType9),
+                new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeM),
             };
 
+            var boardlayout = new[,]
+            {
+                // x, y     so first row is actually the first column
+                {plyr1Space, plyr1Space, plyr1Space, plyr1Space, _____Space, _____Space, plyr2Space, plyr2Space, plyr2Space, plyr2Space},
+                {plyr1Space, plyr1Space, plyr1Space, plyr1Space, _____Space, _____Space, plyr2Space, plyr2Space, plyr2Space, plyr2Space},
+                {plyr1Space, plyr1Space, plyr1Space, plyr1Space, waterSpace, waterSpace, plyr2Space, plyr2Space, plyr2Space, plyr2Space},
+                {plyr1Space, plyr1Space, plyr1Space, plyr1Space, waterSpace, waterSpace, plyr2Space, plyr2Space, plyr2Space, plyr2Space},
+                {plyr1Space, plyr1Space, plyr1Space, plyr1Space, _____Space, _____Space, plyr2Space, plyr2Space, plyr2Space, plyr2Space},
+                {plyr1Space, plyr1Space, plyr1Space, plyr1Space, _____Space, _____Space, plyr2Space, plyr2Space, plyr2Space, plyr2Space},
+                {plyr1Space, plyr1Space, plyr1Space, plyr1Space, waterSpace, waterSpace, plyr2Space, plyr2Space, plyr2Space, plyr2Space},
+                {plyr1Space, plyr1Space, plyr1Space, plyr1Space, waterSpace, waterSpace, plyr2Space, plyr2Space, plyr2Space, plyr2Space},
+                {plyr1Space, plyr1Space, plyr1Space, plyr1Space, _____Space, _____Space, plyr2Space, plyr2Space, plyr2Space, plyr2Space},
+                {plyr1Space, plyr1Space, plyr1Space, plyr1Space, _____Space, _____Space, plyr2Space, plyr2Space, plyr2Space, plyr2Space},
+            };
 
-
-
-            // populate the human player's pieces
-            for (int y = 6; y < 10; y++)
-                for (int x = 0; x < 10; x++)
+            // populate the piece colleciton with the rule's number of pieces
+            foreach (GameRules.Arsenal ars in Arsenal)
+            {
+                for (int i = 0; i < ars.CountStart; i++)
                 {
-                    pieces.Add(new Piece(x, y)
+                    pieces.Add(new Piece(-1, -1, ars.Owner, ars.Type)
                     {
-                        IsRevealed = false,
-                        Owner = playerOne,
-                        Type = pieceType1,
+                        pos = Piece.removedPos // ensure unplaced pieces are flagged correctly
                     });
-                    pieceCount++;
                 }
+            }
 
-            // populate the computer player's pieces
-            for (int y = 0; y < 4; y++)
-                for (int x = 0; x < 10; x++)
+            Random rand = new Random();
+
+            int countPlaced = 0;
+            // place the pieces on the board
+            for (int x = 0; x < 10; x++)
+            {
+                for (int y = 0; y < 10; y++)
                 {
-                    pieces.Add(new Piece(x, y)
-                    {
-                        IsRevealed = false,
-                        Owner = PlayerTwo,
-                        Type = pieceType1,
-                    });
-                    pieceCount++;
+                    var unplacedPieces = pieces.Where(q => q.Owner == boardlayout[x, y].StarterPlace && q.pos.X < 0).ToList();
+
+                    // if the selected board location does not belong to a player
+                    if (unplacedPieces.Count == 0)
+                        continue;
+
+                    // get a random piece from the collection that has not been placed yet
+                    Piece randomPiece = unplacedPieces.ElementAt(rand.Next(0, unplacedPieces.Count));
+                    randomPiece.pos = new CoordAbs(x, y);
+                    countPlaced++;
                 }
+            }
+
+            // no piece should be remaining off the board
+            System.Diagnostics.Debug.Assert(!pieces.Any(q => q.pos.X < 0));
 
 
 
             GameRules rules = new GameRules(
 
-                _arsenal: arsenal,
+                _arsenal: Arsenal,
 
                 _players: new List<Player>()
                 {
                     playerOne,
-                    PlayerTwo
+                    playerTwo
                 },
 
                 _startingBoard: new Board()
                 {
                     Height = 10,
                     Width = 10,
-                    LocationsLayout = new[,]
-                    {
-                        // x, y     so first row is actually the first column
-                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
-                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
-                        {startSpace, startSpace, startSpace, _____Space, waterSpace, waterSpace, _____Space, startSpace, startSpace, startSpace},
-                        {startSpace, startSpace, startSpace, _____Space, waterSpace, waterSpace, _____Space, startSpace, startSpace, startSpace},
-                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
-                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
-                        {startSpace, startSpace, startSpace, _____Space, waterSpace, waterSpace, _____Space, startSpace, startSpace, startSpace},
-                        {startSpace, startSpace, startSpace, _____Space, waterSpace, waterSpace, _____Space, startSpace, startSpace, startSpace},
-                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
-                        {startSpace, startSpace, startSpace, _____Space, _____Space, _____Space, _____Space, startSpace, startSpace, startSpace},
-                    },
+                    LocationsLayout = boardlayout,
                     PiecesLayout = new Piece[10, 10],
                     PieceSet = pieces,
 
 
                 }
-            );
+            )
+            {
+                // Function to determine if a player automatically wins (true), lost (false), or is still active in game (null)
+                TerminalStateFunction = (theRules, board, player) =>
+                {
+                    bool? result = null;
+                    string reason = "unknown";
+
+                    // over turn limit is a loss - used for turn planning
+                    if (board.TurnNumber >= theRules.MaxPhysicalTurns)
+                    {
+                        reason = "Exceeded maximum turns";
+                        result = false;
+                    }
+
+                    // game is over if player lost their flag
+                    if (!board.PieceSet.Exists(x => x.Type == pieceTypeFlag
+                                                    && x.pos != Piece.removedPos
+                                                    && x.Owner == player))
+                    {
+                        reason = "Lost flag";
+                        result = false;
+                    }
+
+                    // if we lost all our movable pieces
+                    bool lostAllPieces = board.PieceSet.Where(x => x.Owner == player
+                                                                   && x.Type.Movable)
+                        .All(x => x.pos == Piece.removedPos);
+                    if (lostAllPieces)
+                    {
+                        reason = "Lost all mobile pieces";
+                        result = false;
+                    }
+
+                    if (theRules.LoggingSettings.winLossReasons)
+                    {
+                        if (result == true)
+                            Console.WriteLine(player.FriendlyName + " won ... " + reason);
+                        if (result == false)
+                            Console.WriteLine(player.FriendlyName + " lost ... " + reason);
+                    }
+
+                    return result; // otherwise still in game
+                }
+            };
 
 
-            Game game = new Game()
+                Game game = new Game()
             {
                 GameNumber = 1,
                 rules = rules,
@@ -130,15 +203,15 @@ namespace GameCore
                     new GameRules.Arsenal(0, 1, 1, playerOne, pieceType2),
                     new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeFlag),
 
-                    new GameRules.Arsenal(0, 1, 1, PlayerTwo, pieceType1),
-                    new GameRules.Arsenal(0, 1, 1, PlayerTwo, pieceType2),
-                    new GameRules.Arsenal(0, 1, 1, PlayerTwo, pieceTypeFlag),
+                    new GameRules.Arsenal(0, 1, 1, playerTwo, pieceType1),
+                    new GameRules.Arsenal(0, 1, 1, playerTwo, pieceType2),
+                    new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeFlag),
                 },
 
                 _players: new List<Player>()
                 {
                     playerOne,
-                    PlayerTwo
+                    playerTwo
                 },
 
                 _startingBoard: new Board()
@@ -164,9 +237,9 @@ namespace GameCore
                         new Piece(1, 0, playerOne, pieceType2),
                         new Piece(0, 1, playerOne, pieceType1),
 
-                        new Piece(2, 1, PlayerTwo, pieceType1),
-                        new Piece(1, 2, PlayerTwo, pieceType2),
-                        new Piece(2, 2, PlayerTwo, pieceTypeFlag)
+                        new Piece(2, 1, playerTwo, pieceType1),
+                        new Piece(1, 2, playerTwo, pieceType2),
+                        new Piece(2, 2, playerTwo, pieceTypeFlag)
                     }
                 }
             )
@@ -239,28 +312,38 @@ namespace GameCore
             Controller = new Controllers.RandomController(),
         };
 
-        public static Player PlayerTwo = new Player()
+        public static Player playerTwo = new Player()
         {
             FriendlyName = "Player 2",
             FriendlySymbol = "-",
             Controller = new Controllers.RandomController(),
         };
 
-        public static PieceType pieceType1 = new PieceType("Pawn1", 1, "1");
-        public static PieceType pieceType2 = new PieceType("Pawn2", 2, "2");
-        public static PieceType pieceType3 = new PieceType("Pawn3", 3, "3");
-        public static PieceType pieceType4 = new PieceType("Pawn4", 4, "4");
-        public static PieceType pieceType5 = new PieceType("Pawn5", 5, "5");
-        public static PieceType pieceType6 = new PieceType("Pawn6", 6, "6");
-        public static PieceType pieceType7 = new PieceType("Pawn7", 7, "7");
-        public static PieceType pieceType8 = new PieceType("Pawn8", 8, "8");
-        public static PieceType pieceType9 = new PieceType("Pawn9", 9, "9");
+        public static PieceType pieceType1 = new PieceType("Pawn", 1, "1");
+        public static PieceType pieceType2 = new PieceType("Scout", 2, "2");
+        public static PieceType pieceType3 = new PieceType("Miner", 3, "3");
+        public static PieceType pieceType4 = new PieceType("Sergeant", 4, "4");
+        public static PieceType pieceType5 = new PieceType("Lieutenant", 5, "5");
+        public static PieceType pieceType6 = new PieceType("Captain", 6, "6");
+        public static PieceType pieceType7 = new PieceType("Major", 7, "7");
+        public static PieceType pieceType8 = new PieceType("Colonel", 8, "8");
+        public static PieceType pieceType9 = new PieceType("General", 9, "9");
         public static PieceType pieceTypeM = new PieceType("Marshall", 10, "M");
-
         public static PieceType pieceTypeFlag = new PieceType("Flag", 0, "F")
         {
             Movable = false,
         };
+
+
+        // not implemented
+        public static PieceType pieceTypeSpy = new PieceType("Spy", 1, "S");
+        public static PieceType pieceTypeBomb = new PieceType("Bomb", 11, "B")
+        {
+            Movable = false,
+        };
+
+
+
 
         #endregion
     }

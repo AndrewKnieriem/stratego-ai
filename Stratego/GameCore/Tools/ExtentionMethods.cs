@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,6 +40,11 @@ namespace GameCore
                 t.Seconds,
                 t.Milliseconds);
             return answer;
+        }
+
+        public static T GetRandom<T>(this T collection) where T : IEnumerable
+        {
+            throw new NotImplementedException();
         }
     }
 }
