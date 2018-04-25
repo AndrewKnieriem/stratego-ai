@@ -13,12 +13,22 @@ namespace Tests
     {
         static void Main(string[] args)
         {
-            Adversarial();
+            HugeMonteCarlo();
         }
 
+        static void HugeMonteCarlo()
+        {
+            var hugeMonte = new MonteCarloController(1000, 100);
+            var rando = new RandomController();
+
+            float winrate = CompareWins(hugeMonte, rando, 100, 2000);
+            Console.WriteLine($"{hugeMonte.GetControllerName()} vs {rando.GetControllerName()} = {(Math.Round(winrate * 100, 2))}");
+        }
 
         static void Adversarial()
         {
+
+
             // create a matrix of comparisons of algorithms against each other
             List<IPlayerController> Controllers = new List<IPlayerController>()
             {
@@ -38,12 +48,12 @@ namespace Tests
         }
 
 
-        static float CompareWins(IPlayerController controller1, IPlayerController controller2, bool showGameResults = false)
+        static float CompareWins(IPlayerController controller1, IPlayerController controller2, int maxgames = 250, int maxphysturns = 2000, bool showGameResults = false)
         {
             int countP1Wins = 0;
             int countDraws = 0;
-            int maxGames = 250;
-            int maxPhysTurns = 1000;
+            int maxGames = maxgames;
+            int maxPhysTurns = maxphysturns;
             
             // since these are statics we cant parallel them without risking changing their controller midway
             var p1 = new Player()
