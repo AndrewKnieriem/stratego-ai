@@ -278,7 +278,7 @@ namespace GameCore
             public int turnsElapsed;
             public TimeSpan timeElapsed;
             
-            public string ToCSV() => $"{turnsElapsed},{timeElapsed.Milliseconds},{(String.Join("|",Winners.Select(x=>x.FriendlyName)))}";
+            public string ToCSV() => $"{turnsElapsed},{timeElapsed.TotalMilliseconds},{(String.Join("|",Winners.Select(x=>x.FriendlyName)))}";
         }
 
 }

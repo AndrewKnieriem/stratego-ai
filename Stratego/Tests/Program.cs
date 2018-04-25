@@ -13,7 +13,7 @@ namespace Tests
     {
         static void Main(string[] args)
         {
-            HugeMonteCarlo();
+            Adversarial();
         }
 
         static void HugeMonteCarlo()
@@ -27,8 +27,6 @@ namespace Tests
 
         static void Adversarial()
         {
-
-
             // create a matrix of comparisons of algorithms against each other
             List<IPlayerController> Controllers = new List<IPlayerController>()
             {
