@@ -43,6 +43,15 @@ namespace GameCore.Controllers
         {
             List<Move> moves = game.CurrentBoard.GetLegalMovesForPlayer(player, game.rules).ToList();
 
+            if (moves.Count == 0)
+            {
+                if (game.rules.LoggingSettings.showEachPlayersPlanning)
+                    Console.WriteLine("NO MOVES AVAILABLE");
+
+                return null;
+            }
+
+
             int choice = rand.Next(0, moves.Count); // second number is exlusive
             if (game.rules.LoggingSettings.showEachPlayersPlanning)
                 Console.WriteLine("choosing option " + choice);
@@ -60,6 +69,7 @@ namespace GameCore.Controllers
             return null;
         }
 
+        /*
         public float CalculateUtility(Board board) // this is a function for the heuristics and should be moved out of the board and into a controller
         {
             float utility = 0;
@@ -69,6 +79,7 @@ namespace GameCore.Controllers
             }
             return utility;
         }
+        */
 
         public int CalcFringeAtDepth(int branching, int depth) => (int)Math.Pow(branching, depth);
 

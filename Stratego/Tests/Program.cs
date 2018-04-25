@@ -15,13 +15,16 @@ namespace Tests
             CompareWins();
         }
         
+        
+
+
         static void CompareWins()
         {
             Console.WriteLine("Starting simulations, please wait...");
             Stopwatch totalTime = Stopwatch.StartNew();
 
             StringBuilder csv = new StringBuilder();
-            string sessionName = "Mode-Classic_Agents-2Random_Turns-2000_Games-10000";
+            string sessionName = "ModeFULL-Agents2Random-Turns2000-Games10000";
 
             // csv headers
             csv.AppendLine("Session,Game,Turns,Elapsed,Winners");
@@ -38,7 +41,7 @@ namespace Tests
             Parallel.For(0, maxGames, (int i) =>
             {
                 // TODO any way to save the rules but rerun a new game?
-                var game = GameModes.classicStratego();
+                var game = GameModes.FullStratego();
                 game.rules.LoggingSettings = new GameRules.LogSettings()
                 {
                     logTime = true,
@@ -92,13 +95,14 @@ namespace Tests
         {
             while (true)
             {
-                var game = GameModes.classicStratego();
+                var game = GameModes.FullStratego();
                 game.rules.LoggingSettings = new GameRules.LogSettings()
                 {
                     logTime = false,
                     showEachPlayersPlanning = false,
-                    showStatePerTurn = true,
+                    showStatePerTurn = false,
                     pausePerMove = false,
+                    listMoveSeqenceAtEnd = true,
                 };
                 game.rules.MaxPhysicalTurns = 1000;
 
@@ -129,7 +133,7 @@ namespace Tests
 
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            Game game = GameModes.classicStratego();
+            Game game = GameModes.FullStratego();
 
             Console.WriteLine("Board Setup: " + watch.Elapsed.TotalMilliseconds);
 
@@ -144,10 +148,12 @@ namespace Tests
             game.rules.LoggingSettings = new GameRules.LogSettings()
             {
                 logTime = true,
-                showEachPlayersPlanning = true,
+                showEachPlayersPlanning = false,
                 showStatePerTurn = true,
                 pausePerMove = false,
                 winLossReasons = true,
+                debugJumpchecks = false,
+                showMovePerTurn = true,
             };
             game.rules.MaxPhysicalTurns = 600;
 

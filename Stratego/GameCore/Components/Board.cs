@@ -160,47 +160,43 @@ namespace GameCore
             return str.ToString();
         }
         
-        public GameRules.MoveOutcomes applyMove(Move m) // move must be legal
+        public GameRules.MoveOutcomes applyMove(Move m, GameRules rules) // move must be legal
         {
             // apply the movement
             m.movingPiece.pos = m.ToCoord;
             this.PiecesLayout[m.FromCoord.X, m.FromCoord.Y] = null;
             this.PiecesLayout[m.ToCoord.X, m.ToCoord.Y] = null;
+            
+            // using a single battle function allows for easier customization
+            m.outcome = rules.BattleFunction(m.movingPiece, m.opponentPiece);
 
-            if (m.opponentPiece == null)
+            switch (m.outcome)
             {
-                m.outcome = GameRules.MoveOutcomes.Move;
-                this.PiecesLayout[m.ToCoord.X, m.ToCoord.Y] = m.movingPiece;
-            }
-            else if (m.movingPiece.Type.Rank > m.opponentPiece.Type.Rank) 
-            {
-                m.outcome = GameRules.MoveOutcomes.Win;
-                this.PiecesLayout[m.ToCoord.X, m.ToCoord.Y] = m.movingPiece;
+                case GameRules.MoveOutcomes.Move:
+                    this.PiecesLayout[m.ToCoord.X, m.ToCoord.Y] = m.movingPiece;
+                    break;
+                case GameRules.MoveOutcomes.Win:
+                    this.PiecesLayout[m.ToCoord.X, m.ToCoord.Y] = m.movingPiece;
 
-                // remove the opponent
-                m.opponentPiece.pos = Piece.removedPos;
-                PieceSet.Remove(m.opponentPiece);
-            }
-            else if (m.movingPiece.Type.Rank < m.opponentPiece.Type.Rank)
-            {
-                m.outcome = GameRules.MoveOutcomes.Lose;
-                this.PiecesLayout[m.ToCoord.X, m.ToCoord.Y] = m.opponentPiece;
-                
-                // remove our piece
-                m.movingPiece.pos = Piece.removedPos;
-                PieceSet.Remove(m.movingPiece);
-            }
-            else if (m.movingPiece.Type.Rank == m.opponentPiece.Type.Rank)
-            {
-                m.outcome = GameRules.MoveOutcomes.Tie;
-                
-                // remove the opponent
-                m.opponentPiece.pos = Piece.removedPos;
-                PieceSet.Remove(m.opponentPiece);
-                // remove our piece
-                m.movingPiece.pos = Piece.removedPos;
-                PieceSet.Remove(m.movingPiece);
+                    // remove the opponent
+                    m.opponentPiece.pos = Piece.removedPos;
+                    PieceSet.Remove(m.opponentPiece);
+                    break;
+                case GameRules.MoveOutcomes.Lose:
+                    this.PiecesLayout[m.ToCoord.X, m.ToCoord.Y] = m.opponentPiece;
 
+                    // remove our piece
+                    m.movingPiece.pos = Piece.removedPos;
+                    PieceSet.Remove(m.movingPiece);
+                    break;
+                case GameRules.MoveOutcomes.Tie:
+                    // remove the opponent
+                    m.opponentPiece.pos = Piece.removedPos;
+                    PieceSet.Remove(m.opponentPiece);
+                    // remove our piece
+                    m.movingPiece.pos = Piece.removedPos;
+                    PieceSet.Remove(m.movingPiece);
+                    break;
             }
             
             return m.outcome;

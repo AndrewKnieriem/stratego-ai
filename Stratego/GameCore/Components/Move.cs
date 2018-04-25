@@ -8,7 +8,7 @@ namespace GameCore
 {
     public abstract class Transition
     {
-        
+
     }
 
 
@@ -24,14 +24,14 @@ namespace GameCore
         public GameRules.MoveOutcomes outcome;
         public bool Legal { get; private set; }
 
-        public Move(Piece p, CoordRel coord, Board currentBoard)
+        public Move(Piece p, CoordRel coord, Board currentBoard, GameRules rules)
         {
-            InitializeAndValidateMove(p, coord.ToAbs(p.pos.X, p.pos.Y), currentBoard);
+            InitializeAndValidateMove(p, coord.ToAbs(p.pos.X, p.pos.Y), currentBoard, rules);
         }
 
-        public Move(Piece p, CoordAbs coord, Board currentBoard)
+        public Move(Piece p, CoordAbs coord, Board currentBoard, GameRules rules)
         {
-            InitializeAndValidateMove(p, coord, currentBoard);
+            InitializeAndValidateMove(p, coord, currentBoard, rules);
         }
 
         /// <summary>
@@ -40,35 +40,75 @@ namespace GameCore
         /// <param name="p"></param>
         /// <param name="coord"></param>
         /// <param name="currentBoard"></param>
-        private void InitializeAndValidateMove(Piece p, CoordAbs coord, Board currentBoard)
+        private bool InitializeAndValidateMove(Piece p, CoordAbs coord, Board currentBoard, GameRules rules)
         {
             FromCoord = new CoordAbs(p.pos.X, p.pos.Y);
             movingPiece = p;
-            outcome = GameRules.MoveOutcomes.BadMove;
+            outcome = GameRules.MoveOutcomes.Unknown;
             opponentPiece = null;
             ToCoord = coord;
-
 
             // finish populating the Move and check the legality
 
             Legal = false;
 
-            if (ToCoord.X >= currentBoard.Width // ensure the move stays on the board
+            // ensure the move stays on the board
+            if (ToCoord.X >= currentBoard.Width
                 || ToCoord.X < 0
                 || ToCoord.Y >= currentBoard.Height
                 || ToCoord.Y < 0)
-                return;
+                return false;
 
             opponentPiece = currentBoard.GetPieceAtCoord(ToCoord); // may be null
 
             if (opponentPiece?.Owner == movingPiece.Owner // cannot move into owned space
                 || currentBoard.GetLocationAtCoord(ToCoord)?.Passable == false) // cannot move into obstacles
-                return;
+                return false;
+
+            if ((Math.Abs(FromCoord.X - ToCoord.X) > 1 || Math.Abs(FromCoord.Y - ToCoord.Y) > 1) 
+                && movingPiece.Owner == GameModes.playerTwo
+                && rules.LoggingSettings.debugJumpchecks)
+                System.Diagnostics.Debugger.Break();
+            
+            // check if theres is an empty line to the target location
+            if (p.Type.CanJump == false)
+            {
+                if (rules.LoggingSettings.debugJumpchecks)
+                    Console.WriteLine($"Checking space between {FromCoord} to {ToCoord}...");
+                
+                int xmin = Math.Min(FromCoord.X, ToCoord.X);
+                int xmax = Math.Max(FromCoord.X, ToCoord.X);
+                int ymin = Math.Min(FromCoord.Y, ToCoord.Y);
+                int ymax = Math.Max(FromCoord.Y, ToCoord.Y);
+
+                for (int y = ymin; y <= ymax; y++)
+                    for (int x = xmin; x <= xmax; x++)
+                    {
+                        // dont include the coords of FromCoord nor ToCoord, just between
+                        if (FromCoord.X == x && FromCoord.Y == y ||
+                            ToCoord.X == x && ToCoord.Y == y)
+                            continue;
+                        
+                        // check if the path is clear of empty pieces and is traversable
+                        if (currentBoard.PiecesLayout[x, y] != null || !currentBoard.LocationsLayout[x, y].Passable)
+                        {
+                            Legal = false;
+                            return false;
+                        }
+
+                        if (rules.LoggingSettings.debugJumpchecks)
+                            Console.WriteLine($"{x} {y} is " + currentBoard.PiecesLayout[x, y]
+                                              + " / " + currentBoard.LocationsLayout[x, y].Passable);
+
+                    }
+            }
+
 
             // todo: is legality and battle result predictions premature at this stage?
-            outcome = movingPiece.DetermineWinner(opponentPiece);//defaults to "move" if nothing is in the way
+            // outcome = movingPiece.PredictWinner(opponentPiece, rules);//defaults to "move" if nothing is in the way
 
             Legal = true;
+            return true;
         }
 
 

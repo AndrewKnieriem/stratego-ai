@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GameCore
 {
@@ -62,7 +58,7 @@ namespace GameCore
 
         // TODO MOVE THESE HEURISTIC FUNCTIONS
         #region these only belong to a particular control model - ie heuristics / minimax
-        
+        /*
         public float ComputeTotalHeuristicValue(Board currentBoard)
         {
             return SampleHeuristic_SpacesAvailable(currentBoard) + SampleHeuristic_AttacksAvailable(currentBoard);
@@ -109,21 +105,24 @@ namespace GameCore
 
             return attacksAvailable;
         }
+        */
         #endregion
 
 
+        
+
+        
 
 
-
-        private IEnumerable<CoordRel> GetPossibleMovement()
+        private IEnumerable<CoordRel> GetPossibleMovement(Board board, int maxMove = 1)
         {
             // TODO change movement patterns into an initialization parameter for piece types, needed to validate/prompt user's moves
+            // unfortunately cant have anonymous functions with yield...
+
             if (this.Type.Movable)
             {
-                yield return new CoordRel(0, 1);
-                yield return new CoordRel(0, -1);
-                yield return new CoordRel(1, 0);
-                yield return new CoordRel(-1, 0);
+                foreach (var c in this.Type.PossibleMovementFunction(board))
+                    yield return c;
             }
             else
                 yield break; //return Enumerable.Empty<CoordRel>();
@@ -132,10 +131,10 @@ namespace GameCore
 
         public IEnumerable<Move> GetLegalMoves(Board currentBoard, GameRules rules)
         {
-            foreach (CoordRel newCoord in GetPossibleMovement())
+            foreach (CoordRel newCoord in GetPossibleMovement(currentBoard))
             {
                 // generate the move and validate it
-                Move m = new Move(this, newCoord, currentBoard);
+                Move m = new Move(this, newCoord, currentBoard, rules);
 
                 if (m.Legal)
                 {
@@ -153,13 +152,13 @@ namespace GameCore
         /// </summary>
         /// <param name="opponent"></param>
         /// <returns></returns>
-        public GameRules.MoveOutcomes DetermineWinner(Piece opponent)
+        public GameRules.MoveOutcomes PredictWinner(Piece opponent, GameRules rules)
         {
             if (opponent == null)
                 return GameRules.MoveOutcomes.Move;
 
             if (opponent.IsRevealed)
-                return this.Type.DetermineWinner(opponent.Type);
+                return rules.BattleFunction(this, opponent);
 
             // TODO CHANGE winner determiniation function according to controller
             // according to minimax rules, if we dont know we should assume a loss

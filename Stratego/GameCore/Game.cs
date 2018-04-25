@@ -18,7 +18,26 @@ namespace GameCore
         /// the players in turn order
         /// </summary>
         public List<Player> PlayerOrder { get; set; }
-        
+
+        public Func<Piece, Piece, MoveOutcomes> BattleFunction = VanillaBattleFunction;
+
+        public static Func<Piece, Piece, MoveOutcomes> VanillaBattleFunction = (movingPiece, opponentPiece) =>
+        {
+            MoveOutcomes outcome = MoveOutcomes.Unknown;
+
+            if (opponentPiece == null) // MOVE
+                outcome = GameRules.MoveOutcomes.Move;
+            else if (movingPiece.Type.Rank > opponentPiece.Type.Rank)  // WIN
+                outcome = GameRules.MoveOutcomes.Win;
+            else if (movingPiece.Type.Rank < opponentPiece.Type.Rank) // LOSE
+                outcome = GameRules.MoveOutcomes.Lose;
+            else if (movingPiece.Type.Rank == opponentPiece.Type.Rank) // TIE
+                outcome = GameRules.MoveOutcomes.Tie;
+
+            return outcome;
+        };
+
+
         // TODO: replace Arsenal with piece collections directly under player object
         // as combining the lists is much easier than filtering them out constantly 
         // ... or at least doubly link / reference them for faster finding
@@ -101,11 +120,12 @@ namespace GameCore
             /// <summary>
             /// Since we expect a loss with unknown battles, an Unknown BattleOutcome means its not set
             /// </summary>
-            BadMove = 2,
+            Unknown = 2,
             /// <summary>
             /// Did not attack an enemy, moved successfully
             /// </summary>
             Move = 3,
+            BadMove = 4,
         }
 
         /// <summary>
@@ -135,6 +155,8 @@ namespace GameCore
             public bool pausePerMove = false;
             public bool winLossReasons = true;
             public bool listMoveSeqenceAtEnd = true;
+            public bool debugJumpchecks = false;
+            public bool showBombDefusals = true;
         }
     }
 
@@ -175,7 +197,7 @@ namespace GameCore
                 if (playersMove == null)
                     rules.PlayerOrder.Remove(PlayersTurn);
                 else
-                    CurrentBoard.applyMove(playersMove); // apply the move
+                    CurrentBoard.applyMove(playersMove, rules); // apply the move
 
                 // add the move to the current game's seqence of moves
                 MoveSequence.Add(CurrentBoard.TurnNumber, playersMove);

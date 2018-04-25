@@ -13,10 +13,11 @@ namespace GameCore
         public string SymbolForBoard { get; set; }
         public string ToSymbol() => SymbolForBoard.PadLeft(3);
         public bool Movable { get; set; } = true;
+        public bool CanJump { get; set; } = false; // can jump over other pieces
 
         public PieceType()
         {
-            CalculateBattleOutcome = (PieceType p) => DetermineWinner(p);
+            //CalculateBattleOutcome = (PieceType p) => DetermineWinner(p);
         }
 
         public PieceType(string name, int rank, string symbolforboard)
@@ -25,24 +26,18 @@ namespace GameCore
             Rank = rank;
             SymbolForBoard = symbolforboard;
 
-            CalculateBattleOutcome = (PieceType p) => DetermineWinner(p);
+            //CalculateBattleOutcome = (PieceType p) => DetermineWinner(p);
         }
 
-        public Func<PieceType, GameRules.MoveOutcomes> CalculateBattleOutcome;
+        //public Func<PieceType, GameRules.MoveOutcomes> CalculateBattleOutcome;
 
-        public virtual GameRules.MoveOutcomes DetermineWinner(PieceType opponent)
-        {
-            if (opponent == null)
-                return GameRules.MoveOutcomes.Move;
-            
-            if (this.Rank > opponent.Rank)
-                return GameRules.MoveOutcomes.Win;
-            else if (this.Rank < opponent.Rank)
-                return GameRules.MoveOutcomes.Lose;
-            else
-                return GameRules.MoveOutcomes.Tie; // usually both die
-        }
-
+        public Func<Board, List<CoordRel>> PossibleMovementFunction = (board) =>  new List<CoordRel>()
+            {
+                new CoordRel(0, 1),
+                new CoordRel(0, -1),
+                new CoordRel(-1, 0),
+                new CoordRel(1, 0),
+            };
         
     }
 
