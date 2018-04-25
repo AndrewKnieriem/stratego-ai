@@ -12,7 +12,7 @@ namespace Tests
     {
         static void Main(string[] args)
         {
-            TurnLoops();
+            Debugs();
         }
 
 
@@ -106,7 +106,7 @@ namespace Tests
                     logTime = false,
                     showEachPlayersPlanning = false,
                     showStatePerTurn = false,
-                    showMovePerTurn = true,
+                    showMovePerTurn = false,
                     pausePerMove = false,
                     listMoveSeqenceAtEnd = true,
                 };
@@ -154,9 +154,9 @@ namespace Tests
             game.rules.LoggingSettings = new GameRules.LogSettings()
             {
                 logTime = true,
-                showEachPlayersPlanning = true,
+                showEachPlayersPlanning = false,
                 showStatePerTurn = true,
-                pausePerMove = false,
+                pausePerMove = true,
                 winLossReasons = true,
                 debugJumpchecks = false,
                 showMovePerTurn = true,

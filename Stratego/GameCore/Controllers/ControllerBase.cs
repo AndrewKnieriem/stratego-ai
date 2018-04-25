@@ -99,7 +99,7 @@ namespace GameCore.Controllers
 
         public Move chooseMove(Game game, Player player)
         {
-            Dictionary<Move, int> moveResults = new Dictionary<Move, int>();
+            Dictionary<simpleMove, int> moveResults = new Dictionary<simpleMove, int>();
 
             // have to treat this player as if they will play random in these sub-games, not as monte carlo
             var currentController = player.Controller;
@@ -126,7 +126,7 @@ namespace GameCore.Controllers
                     {
                         logTime = false,
                         showEachPlayersPlanning = false,
-                        showStatePerTurn = true,
+                        showStatePerTurn = false,
                         pausePerMove = false,
                         winLossReasons = false,
                         debugJumpchecks = false,
@@ -139,7 +139,7 @@ namespace GameCore.Controllers
 
 
                 // randomize any unknown pieces on the board
-                if (false && testgame.CurrentBoard.PieceSet.Any(x => x.IsRevealed == false && x.Owner != player))
+                if (testgame.CurrentBoard.PieceSet.Any(x => x.IsRevealed == false && x.Owner != player))
                 {
                     List<CoordAbs> availableSpaces = new List<CoordAbs>();
                     // randomize any unknown piece and play through
@@ -182,13 +182,21 @@ namespace GameCore.Controllers
                 
                 // lookup via string instead of object
                 Move firstMove = testgame.MoveSequence.FirstOrDefault().Value; // remember move sequence is <turn, move>
-                if (moveResults.Keys.Contains(firstMove))
-                    moveResults[firstMove] += score;
+
+                simpleMove simple = new simpleMove()
+                {
+                    from = firstMove.FromCoord,
+                    to = firstMove.ToCoord,
+                };
+
+
+                if (moveResults.Keys.Contains(simple))
+                    moveResults[simple] += score;
                 else
-                    moveResults.Add(firstMove, score);
+                    moveResults.Add(simple, score);
 
                 if (game.rules.LoggingSettings.showEachPlayersPlanning || ShowSubResults)
-                    Console.WriteLine($"{firstMove} ... => {score}, Total = {moveResults[firstMove]}");
+                    Console.WriteLine($"{firstMove} ... => {score}, Total = {moveResults[simple]}");
 
                 System.Diagnostics.Debug.Unindent();
             }
@@ -199,11 +207,26 @@ namespace GameCore.Controllers
 
             // do the move that has the most win options
             // Note: the liklihood of making the same move, with 1000 randomized boards seems infinitely tiny, let alone useful
-            var bestMove = moveResults.OrderByDescending(x => x.Value).FirstOrDefault();
+            var bestMoveStats = moveResults.OrderByDescending(x => x.Value).FirstOrDefault();
             if (game.rules.LoggingSettings.showEachPlayersPlanning || ShowSubResults)
-                Console.WriteLine("Best move from subgames: " + bestMove.Key.ToString() + " w/ score " + bestMove.Value);
+                Console.WriteLine("Best move from subgames: " + bestMoveStats.Key.ToString() + " w/ score " + bestMoveStats.Value);
+
+            var bestMove = bestMoveStats.Key;
+
+            // convert the sub-game move into a move that is applicable to the current game
+            var relevantMove = new Move(
+                game.CurrentBoard.GetPieceAtCoord(bestMove.from), 
+                bestMove.to,
+                game.CurrentBoard, game.rules
+            );
             
-            return bestMove.Key;
+            return relevantMove;
+        }
+
+        private struct simpleMove
+        {
+            public CoordAbs from;
+            public CoordAbs to;
         }
     }
 

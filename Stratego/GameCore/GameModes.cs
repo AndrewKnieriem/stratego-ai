@@ -130,8 +130,6 @@ namespace GameCore
                         LocationsLayout = boardlayout,
                         PiecesLayout = new Piece[10, 10],
                         PieceSet = pieces,
-
-
                     }
                 )
             {
@@ -185,7 +183,7 @@ namespace GameCore
             {
                 GameNumber = 1,
                 rules = rules,
-                CurrentBoard = rules.InitialBoard, // need to ensure it makes a deep copy
+                CurrentBoard = new Board(rules.InitialBoard), // need to ensure it makes a deep copy
             };
 
             return game;
@@ -202,7 +200,11 @@ namespace GameCore
         {
             FriendlyName = "Player 1",
             FriendlySymbol = "+",
-            Controller = new Controllers.MonteCarloController(10),
+            Controller = new Controllers.MonteCarloController(10)
+            {
+                ShowSubGames = false,
+                ShowSubResults = false,
+            }
         };
 
         public static Player playerTwo = new Player()

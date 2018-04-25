@@ -18,7 +18,7 @@ namespace GameCore
         // OPTION 1 : unknown until known 100%
         public bool IsRevealed => turnRevealed.HasValue;
 
-        public int? turnRevealed = null;
+        public int? turnRevealed { get; set; } = null;
 
 
 

@@ -39,7 +39,6 @@ namespace GameCore
 
         // Complete lists, can manage pieces not on board
         public List<Piece> PieceSet { get; set; }
-
         public LocationType[] LocationSet { get; set; }
 
         // Spatial references, pieces in play
@@ -112,6 +111,7 @@ namespace GameCore
 
             
             // https://stackoverflow.com/questions/18547354/c-sharp-linq-find-duplicates-in-list
+            /*
             var dupes = PieceSet.GroupBy(x => x.pos).Where(g => g.Count() > 1).Select(y => y.Key).ToList();
 
             if (dupes.Count > 0)
@@ -119,7 +119,27 @@ namespace GameCore
                 Console.WriteLine(" -------------- DUPES");
                 System.Diagnostics.Debugger.Break();
             }
-            
+            */
+        }
+
+        public bool CopyFromSetToLayout()
+        {
+            this.PiecesLayout = new Piece[this.Width, this.Height];
+
+            foreach (Piece p in this.PieceSet)
+            {
+                if (this.PiecesLayout[p.pos.X, p.pos.Y] == null)
+                {
+                    this.PiecesLayout[p.pos.X, p.pos.Y] = p;
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: cannot place pieces in the same location");
+                    throw new Exception("ERROR: cannot place pieces in the same location");
+                }
+            }
+
+            return true;
         }
 
         public IEnumerable<Move> GetLegalMovesForPlayer(Player p, GameRules rules)
@@ -200,15 +220,15 @@ namespace GameCore
             this.PiecesLayout[m.ToCoord.X, m.ToCoord.Y] = null;
 
             // using a single battle function allows for easier customization
-            
-            if (m.movingPiece != null)
-                m.movingPiece.turnRevealed = TurnNumber;
 
+            // if a battle took place at all, reveal the pieces
+            if (m.movingPiece != null && m.opponentPiece != null)
+                m.movingPiece.turnRevealed = TurnNumber;
             if (m.opponentPiece != null)
                 m.opponentPiece.turnRevealed = TurnNumber;
-
+            
             m.outcome = rules.BattleFunction(m.movingPiece, m.opponentPiece);
-
+            
             switch (m.outcome)
             {
                 case GameRules.MoveOutcomes.Move:

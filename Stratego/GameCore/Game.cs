@@ -20,7 +20,7 @@ namespace GameCore
         /// </summary>
         public List<Player> PlayerOrder { get; set; }
 
-        public Func<Piece, Piece, MoveOutcomes> BattleFunction = VanillaBattleFunction;
+        public Func<Piece, Piece, MoveOutcomes> BattleFunction { get; set; } = VanillaBattleFunction;
 
         public static Func<Piece, Piece, MoveOutcomes> VanillaBattleFunction = (movingPiece, opponentPiece) =>
         {
@@ -79,13 +79,14 @@ namespace GameCore
             Arsenals = _arsenal;
             PlayerOrder = _players;
             InitialBoard = _startingBoard;
-
             
             // cross reference the objects between the collections to reduce lookups later
             // TODO: test that all references are updated in all sources
+            
             foreach (Player p in PlayerOrder)
             {
-                p.Arsenal = Arsenals.Where(x => x.Owner == p);
+                if(p.Arsenal == null)
+                    p.Arsenal = Arsenals.Where(x => x.Owner == p);
             }
 
             // update starting counts based on how the initial board is layed out, ie if 2 pawns are already out, set that in the arsenal
@@ -93,25 +94,8 @@ namespace GameCore
             //{
             //    a.CountStart = InitialBoard.PieceSet.Where(x=>x.Owner == a.Owner && x.PieceType == a.PieceType).Count()
             //}
-
             
-            InitialBoard.PiecesLayout = new Piece[InitialBoard.Width, InitialBoard.Height];
-            
-
-            foreach (Piece p in InitialBoard.PieceSet)
-            {
-                if (InitialBoard.PiecesLayout[p.pos.X, p.pos.Y] == null)
-                {
-                    InitialBoard.PiecesLayout[p.pos.X, p.pos.Y] = p;
-                }
-                else
-                {
-                    Console.WriteLine("ERROR: cannot place pieces in the same location");
-                    throw new Exception("ERROR: cannot place pieces in the same location");
-                }
-            }
-
-
+            InitialBoard?.CopyFromSetToLayout();
         }
 
         
@@ -193,7 +177,7 @@ namespace GameCore
             //MoveSequence = new Dictionary<int, Move>(othergame.MoveSequence);
             
 
-            rules = new GameRules(othergame.rules.Arsenals, new List<Player>(othergame.rules.PlayerOrder), othergame.rules.InitialBoard)
+            rules = new GameRules(othergame.rules.Arsenals, new List<Player>(othergame.rules.PlayerOrder), null)
             {
                 BattleFunction = othergame.rules.BattleFunction,
                 LoggingSettings = othergame.rules.LoggingSettings,

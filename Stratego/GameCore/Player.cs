@@ -19,6 +19,7 @@ namespace GameCore
         // a collection of the pieces owned by the user would be nice for faster "per-player" actions,
         // however when projecting moves the piece collection is altered and we don't carry the player objects
         // we only carry the board for future states, which has the pieces
+        public override string ToString() => FriendlyName + " (" + Controller?.GetControllerName() + ")";
 
         public Player()
         {

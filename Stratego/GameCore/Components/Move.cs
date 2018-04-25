@@ -26,29 +26,29 @@ namespace GameCore
         public GameRules.MoveOutcomes outcome;
         public bool Legal { get; private set; }
 
-        public Move(Piece p, CoordRel coord, Board currentBoard, GameRules rules)
+        public Move(Piece p, CoordRel targetCoord, Board currentBoard, GameRules rules)
         {
-            InitializeAndValidateMove(p, coord.ToAbs(p.pos.X, p.pos.Y), currentBoard, rules);
+            InitializeAndValidateMove(p, targetCoord.ToAbs(p.pos.X, p.pos.Y), currentBoard, rules);
         }
 
-        public Move(Piece p, CoordAbs coord, Board currentBoard, GameRules rules)
+        public Move(Piece p, CoordAbs targetCoord, Board currentBoard, GameRules rules)
         {
-            InitializeAndValidateMove(p, coord, currentBoard, rules);
+            InitializeAndValidateMove(p, targetCoord, currentBoard, rules);
         }
 
         /// <summary>
         /// Given a pice and its new location, check if the move is allowed based on obstructions, limits, etc
         /// </summary>
         /// <param name="p"></param>
-        /// <param name="coord"></param>
+        /// <param name="targetCoord"></param>
         /// <param name="currentBoard"></param>
-        private bool InitializeAndValidateMove(Piece p, CoordAbs coord, Board currentBoard, GameRules rules)
+        private bool InitializeAndValidateMove(Piece p, CoordAbs targetCoord, Board currentBoard, GameRules rules)
         {
             FromCoord = new CoordAbs(p.pos.X, p.pos.Y);
             movingPiece = p;
             outcome = GameRules.MoveOutcomes.Unknown;
             opponentPiece = null;
-            ToCoord = coord;
+            ToCoord = targetCoord;
 
             // finish populating the Move and check the legality
 
