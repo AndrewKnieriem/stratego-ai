@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameCore
 {
+    
     public abstract class Transition
     {
 
@@ -15,6 +16,7 @@ namespace GameCore
     /// <summary>
     /// transition between states, it has to be complex enough to support any kind of board change
     /// </summary>
+    
     public class Move : Transition
     {
         public Piece movingPiece;

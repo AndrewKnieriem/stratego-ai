@@ -8,9 +8,8 @@ namespace GameCore
 {
     public static class GameModes
     {
-        public static Game FullStratego()
+        public static Game FullNewStratego()
         {
-
             LocationType _____Space = new LocationType();
             LocationType plyr1Space = new LocationType()
             {
@@ -34,6 +33,7 @@ namespace GameCore
 
             var Arsenal = new List<GameRules.Arsenal>()
             {
+                // https://en.wikipedia.org/wiki/Stratego#Pieces
                 // min, max, and start define the range of pieces a player can place to start the game
                 new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeFlag),
                 new GameRules.Arsenal(0, 6, 6, playerOne, pieceTypeBomb),
@@ -94,20 +94,18 @@ namespace GameCore
             int countPlaced = 0;
             // place the pieces on the board
             for (int x = 0; x < 10; x++)
+            for (int y = 0; y < 10; y++)
             {
-                for (int y = 0; y < 10; y++)
-                {
-                    var unplacedPieces = pieces.Where(q => q.Owner == boardlayout[x, y].StarterPlace && q.pos.X < 0).ToList();
+                var unplacedPieces = pieces.Where(q => q.Owner == boardlayout[x, y].StarterPlace && q.pos.X < 0).ToList();
 
-                    // if the selected board location does not belong to a player
-                    if (unplacedPieces.Count == 0)
-                        continue;
+                // if the selected board location does not belong to a player
+                if (unplacedPieces.Count == 0)
+                    continue;
 
-                    // get a random piece from the collection that has not been placed yet
-                    Piece randomPiece = unplacedPieces.ElementAt(rand.Next(0, unplacedPieces.Count));
-                    randomPiece.pos = new CoordAbs(x, y);
-                    countPlaced++;
-                }
+                // get a random piece from the collection that has not been placed yet
+                Piece randomPiece = unplacedPieces.ElementAt(rand.Next(0, unplacedPieces.Count));
+                randomPiece.pos = new CoordAbs(x, y);
+                countPlaced++;
             }
 
             // no piece should be remaining off the board
@@ -181,9 +179,7 @@ namespace GameCore
                 },
 
             };
-
-
-
+            
 
             Game game = new Game()
             {
@@ -196,118 +192,7 @@ namespace GameCore
         }
 
 
-        [Obsolete("Classic stratego has all the rules, and appears to perform fast enough")]
-        public static Game tinyStratego()
-        {
-
-            LocationType _____Space = new LocationType();
-
-
-            GameRules rules = new GameRules(
-
-                _arsenal: new List<GameRules.Arsenal>()
-                {
-            // min, max, and start define the range of pieces a player can place to start the game
-            new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeBomb),
-            new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeMiner),
-            new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeFlag),
-
-            new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeBomb),
-            new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeMiner),
-            new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeFlag),
-                },
-
-                _players: new List<Player>()
-                {
-            playerOne,
-            playerTwo
-                },
-
-                _startingBoard: new Board()
-                {
-                    Height = 3,
-                    Width = 3,
-                    LocationsLayout = new[,]
-                    {
-                // x, y     so first row is actually the first column
-                {_____Space, _____Space, _____Space},
-                {_____Space, _____Space, _____Space},
-                {_____Space, _____Space, _____Space},
-                    },
-                    PiecesLayout = new Piece[3, 3],
-                    PieceSet = new List<Piece>
-                    {
-                /*
-                 * [      ,  -2  ,  -f ]
-                 * [  +1  ,      ,  -1 ]
-                 * [  +f  ,  +2  ,     ]
-                 */
-                new Piece(0, 0, playerOne, pieceTypeFlag),
-                new Piece(1, 0, playerOne, pieceTypeMiner),
-                new Piece(0, 1, playerOne, pieceTypeBomb),
-
-                new Piece(2, 1, playerTwo, pieceTypeBomb),
-                new Piece(1, 2, playerTwo, pieceTypeMiner),
-                new Piece(2, 2, playerTwo, pieceTypeFlag)
-                    }
-                }
-            )
-            {
-                // Function to determine if a player automatically wins (true), lost (false), or is still active in game (null)
-                TerminalStateFunction = (theRules, board, player) =>
-                {
-                    bool? result = null;
-                    string reason = "unknown";
-
-                    // over turn limit is a loss - used for turn planning
-                    if (board.TurnNumber >= theRules.MaxPhysicalTurns)
-                    {
-                        reason = "Exceeded maximum turns";
-                        result = false;
-                    }
-
-                    // game is over if player lost their flag
-                    if (!board.PieceSet.Exists(x => x.Type == pieceTypeFlag
-                                                            && x.pos != Piece.removedPos
-                                                            && x.Owner == player))
-                    {
-                        reason = "Lost flag";
-                        result = false;
-                    }
-
-                    // if we lost all our movable pieces
-                    bool lostAllPieces = board.PieceSet.Where(x => x.Owner == player
-                                                                           && x.Type.Movable)
-                                .All(x => x.pos == Piece.removedPos);
-                    if (lostAllPieces)
-                    {
-                        reason = "Lost all mobile pieces";
-                        result = false;
-                    }
-
-                    if (theRules.LoggingSettings.winLossReasons)
-                    {
-                        if (result == true)
-                            Console.WriteLine(player.FriendlyName + " won ... " + reason);
-                        if (result == false)
-                            Console.WriteLine(player.FriendlyName + " lost ... " + reason);
-                    }
-
-                    return result; // otherwise still in game
-                },
-                BattleFunction = FullBattleFunction,
-            };
-
-
-            Game game = new Game()
-            {
-                GameNumber = 1,
-                rules = rules,
-                CurrentBoard = new Board(rules.InitialBoard),
-            };
-
-            return game;
-        }
+        
 
 
 
@@ -317,7 +202,7 @@ namespace GameCore
         {
             FriendlyName = "Player 1",
             FriendlySymbol = "+",
-            Controller = new Controllers.RandomController(),
+            Controller = new Controllers.MonteCarloController(10),
         };
 
         public static Player playerTwo = new Player()
@@ -328,8 +213,7 @@ namespace GameCore
         };
 
 
-
-
+        
 
         public static PieceType pieceTypeScout = new PieceType("Scout", 2, "2")
         {
@@ -362,7 +246,6 @@ namespace GameCore
                 return moves;
             },
         };
-
         public static PieceType pieceTypeMiner = new PieceType("Miner", 3, "3");
         public static PieceType pieceType4 = new PieceType("Sergeant", 4, "4");
         public static PieceType pieceType5 = new PieceType("Lieutenant", 5, "5");
@@ -375,9 +258,6 @@ namespace GameCore
         {
             Movable = false,
         };
-
-        // for now custom attack actions are handled in the rules BattleFunction instead of piece types
-        // since these rules would apply to both attackers or defenders and would have to be copied to all
         public static PieceType pieceTypeSpy = new PieceType("Spy", 1, "S");
         public static PieceType pieceTypeBomb = new PieceType("Bomb", 11, "B")
         {
@@ -387,9 +267,13 @@ namespace GameCore
         // placeholder piece
         public static PieceType pieceType1 = new PieceType("Pawn", 1, "1");
 
+        // for now custom attack actions are handled in the rules BattleFunction instead of piece types
+        // since these rules would apply to both attackers or defenders and would have to be copied to all
         public static Func<Piece, Piece, GameRules.MoveOutcomes> FullBattleFunction = (movingPiece, opponentPiece) =>
         {
             GameRules.MoveOutcomes outcome = GameRules.MoveOutcomes.Unknown;
+
+
 
 
             // special bomb rules
@@ -397,8 +281,7 @@ namespace GameCore
             {
                 if (movingPiece.Type == pieceTypeMiner)
                 {
-                    Console.WriteLine("!!!!!!!!!! Bomb Defusal !!!!!!!!!!!");
-                    //System.Diagnostics.Debugger.Break();
+                    // in small games this happens a lot, oddly with full it hardly ever does
                     return GameRules.MoveOutcomes.Win;
                 }
                 else
@@ -418,5 +301,119 @@ namespace GameCore
 
 
         #endregion
+
+
+        [Obsolete("Classic stratego has all the rules, and appears to perform fast enough")]
+        public static Game tinyStratego()
+        {
+
+            LocationType _____Space = new LocationType();
+
+
+            GameRules rules = new GameRules(
+
+                _arsenal: new List<GameRules.Arsenal>()
+                {
+                    // min, max, and start define the range of pieces a player can place to start the game
+                    new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeBomb),
+                    new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeMiner),
+                    new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeFlag),
+
+                    new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeBomb),
+                    new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeMiner),
+                    new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeFlag),
+                },
+
+                _players: new List<Player>()
+                {
+                    playerOne,
+                    playerTwo
+                },
+
+                _startingBoard: new Board()
+                {
+                    Height = 3,
+                    Width = 3,
+                    LocationsLayout = new[,]
+                    {
+                        // x, y     so first row is actually the first column
+                        {_____Space, _____Space, _____Space},
+                        {_____Space, _____Space, _____Space},
+                        {_____Space, _____Space, _____Space},
+                    },
+                    PiecesLayout = new Piece[3, 3],
+                    PieceSet = new List<Piece>
+                    {
+                        /*
+                         * [      ,  -2  ,  -f ]
+                         * [  +1  ,      ,  -1 ]
+                         * [  +f  ,  +2  ,     ]
+                         */
+                        new Piece(0, 0, playerOne, pieceTypeFlag),
+                        new Piece(1, 0, playerOne, pieceTypeMiner),
+                        new Piece(0, 1, playerOne, pieceTypeBomb),
+
+                        new Piece(2, 1, playerTwo, pieceTypeBomb),
+                        new Piece(1, 2, playerTwo, pieceTypeMiner),
+                        new Piece(2, 2, playerTwo, pieceTypeFlag)
+                    }
+                }
+            )
+            {
+                // Function to determine if a player automatically wins (true), lost (false), or is still active in game (null)
+                TerminalStateFunction = (theRules, board, player) =>
+                {
+                    bool? result = null;
+                    string reason = "unknown";
+
+                    // over turn limit is a loss - used for turn planning
+                    if (board.TurnNumber >= theRules.MaxPhysicalTurns)
+                    {
+                        reason = "Exceeded maximum turns";
+                        result = false;
+                    }
+
+                    // game is over if player lost their flag
+                    if (!board.PieceSet.Exists(x => x.Type == pieceTypeFlag
+                                                    && x.pos != Piece.removedPos
+                                                    && x.Owner == player))
+                    {
+                        reason = "Lost flag";
+                        result = false;
+                    }
+
+                    // if we lost all our movable pieces
+                    bool lostAllPieces = board.PieceSet.Where(x => x.Owner == player
+                                                                   && x.Type.Movable)
+                        .All(x => x.pos == Piece.removedPos);
+                    if (lostAllPieces)
+                    {
+                        reason = "Lost all mobile pieces";
+                        result = false;
+                    }
+
+                    if (theRules.LoggingSettings.winLossReasons)
+                    {
+                        if (result == true)
+                            Console.WriteLine(player.FriendlyName + " won ... " + reason);
+                        if (result == false)
+                            Console.WriteLine(player.FriendlyName + " lost ... " + reason);
+                    }
+
+                    return result; // otherwise still in game
+                },
+                BattleFunction = FullBattleFunction,
+            };
+
+
+            Game game = new Game()
+            {
+                GameNumber = 1,
+                rules = rules,
+                CurrentBoard = new Board(rules.InitialBoard),
+            };
+
+            return game;
+        }
     }
 }

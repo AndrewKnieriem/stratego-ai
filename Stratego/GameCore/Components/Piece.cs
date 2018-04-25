@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace GameCore
 {
-
+    
     public class Piece
     {
         public CoordAbs pos { get; set; }
@@ -16,7 +16,10 @@ namespace GameCore
         #region Probability predictions of opponent pieces, 
 
         // OPTION 1 : unknown until known 100%
-        public bool IsRevealed { get; set; } = false;
+        public bool IsRevealed => turnRevealed.HasValue;
+
+        public int? turnRevealed = null;
+
 
 
         // OPTION 2: a table of probabilities, at least so eliminated possibilities won't factor in

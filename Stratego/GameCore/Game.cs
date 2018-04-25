@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameCore
 {
+    
     public class GameRules
     {
         public Board InitialBoard { get; private set; } // please don't change after game starts
@@ -24,7 +25,7 @@ namespace GameCore
         public static Func<Piece, Piece, MoveOutcomes> VanillaBattleFunction = (movingPiece, opponentPiece) =>
         {
             MoveOutcomes outcome = MoveOutcomes.Unknown;
-
+            
             if (opponentPiece == null) // MOVE
                 outcome = GameRules.MoveOutcomes.Move;
             else if (movingPiece.Type.Rank > opponentPiece.Type.Rank)  // WIN
@@ -33,7 +34,7 @@ namespace GameCore
                 outcome = GameRules.MoveOutcomes.Lose;
             else if (movingPiece.Type.Rank == opponentPiece.Type.Rank) // TIE
                 outcome = GameRules.MoveOutcomes.Tie;
-
+            
             return outcome;
         };
 
@@ -41,6 +42,7 @@ namespace GameCore
         // TODO: replace Arsenal with piece collections directly under player object
         // as combining the lists is much easier than filtering them out constantly 
         // ... or at least doubly link / reference them for faster finding
+        
         public class Arsenal
         {
             // min, max, and start define the range of pieces a player can place to start the game
@@ -112,6 +114,7 @@ namespace GameCore
 
         }
 
+        
         public enum MoveOutcomes
         {
             Win = 1,
@@ -146,6 +149,7 @@ namespace GameCore
 
         public LogSettings LoggingSettings;
 
+        
         public class LogSettings
         {
             public bool logTime = true;
@@ -157,10 +161,11 @@ namespace GameCore
             public bool listMoveSeqenceAtEnd = true;
             public bool debugJumpchecks = false;
             public bool showBombDefusals = true;
+            public bool showHiddenPieces = true;
         }
     }
 
-
+    
     public class Game
     {
 
@@ -170,13 +175,32 @@ namespace GameCore
         public Board CurrentBoard { get; set; }
         public GameRules rules { get; set; }
         public Player PlayersTurn => rules.PlayerOrder[(CurrentBoard.TurnNumber - 1) % rules.PlayerOrder.Count]; // circular index of players (trouble with double turns)
-
         public Dictionary<int, Move> MoveSequence { get; set; } = new Dictionary<int, Move>();
+
+        // need to eventually implement these
+        public Dictionary<Player, int> RepeatedMoveCounter; // prevents players from repeating same sequence 3 times in a row
+        public HashSet<Board> PreviousBoardStates; // prevents players from repeating the board state 3 times
+
         public Game()
         {
 
         }
-        
+
+        public Game(Game othergame)
+        {
+            // TODO some data attributes may not be completely deep-cloned, such as players and logging settings
+            CurrentBoard = new Board(othergame.CurrentBoard); // deep copy of the board
+            //MoveSequence = new Dictionary<int, Move>(othergame.MoveSequence);
+            
+
+            rules = new GameRules(othergame.rules.Arsenals, new List<Player>(othergame.rules.PlayerOrder), othergame.rules.InitialBoard)
+            {
+                BattleFunction = othergame.rules.BattleFunction,
+                LoggingSettings = othergame.rules.LoggingSettings,
+                TerminalStateFunction = othergame.rules.TerminalStateFunction,
+            };
+        }
+
         // todo: restructure this function since it currently changes the state of the object after running
         public GameResults Run() // yield, async, parallel, task.run() ? 
         {
@@ -203,10 +227,16 @@ namespace GameCore
                 MoveSequence.Add(CurrentBoard.TurnNumber, playersMove);
 
                 if (rules.LoggingSettings.showMovePerTurn)
-                    Console.WriteLine(playersMove?.ToString());
-                
+                    Console.WriteLine($"#{CurrentBoard.TurnNumber} {playersMove}");
+
                 if (rules.LoggingSettings.showStatePerTurn)
-                    Console.WriteLine(CurrentBoard.ToString());
+                {
+                    if(rules.LoggingSettings.showHiddenPieces)
+                        Console.WriteLine(CurrentBoard.ToAsciiLayout());
+                    else
+                        Console.WriteLine(CurrentBoard.ToAsciiLayout(PlayersTurn));  // shows what that player sees
+                }
+                   
 
                 if (rules.LoggingSettings.pausePerMove)
                 {
@@ -227,7 +257,7 @@ namespace GameCore
             {
                 Console.WriteLine("Move Sequence:");
                 foreach (KeyValuePair<int, Move> sequence in MoveSequence)
-                    Console.WriteLine($"Turn {sequence.Key} = {sequence.Value.ToString()}");
+                    Console.WriteLine($"Turn {sequence.Key} = {sequence.Value?.ToString() ?? "no move available"}");
             }
 
             return new GameResults()
@@ -238,8 +268,8 @@ namespace GameCore
             };
         }
 
-        
 
+        
         public class GameResults
         {
             public List<Player> Winners;

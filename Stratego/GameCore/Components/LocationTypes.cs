@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace GameCore
 {
     // the properties of a spot on the board; crossable, hidden, high ground, etc
+    
     public class LocationType
     {
         public string Name { get; set; }

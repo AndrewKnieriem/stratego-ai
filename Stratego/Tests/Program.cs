@@ -12,10 +12,15 @@ namespace Tests
     {
         static void Main(string[] args)
         {
-            CompareWins();
+            TurnLoops();
         }
-        
-        
+
+
+        static void Adversarial()
+        {
+            // create a matrix of comparisons of algorithms against each other
+
+        }
 
 
         static void CompareWins()
@@ -24,7 +29,7 @@ namespace Tests
             Stopwatch totalTime = Stopwatch.StartNew();
 
             StringBuilder csv = new StringBuilder();
-            string sessionName = "ModeFULL-Agents2Random-Turns2000-Games10000";
+            string sessionName = "ModeFULL-AgentsRandomVsDepth-Turns2000-Games10000";
 
             // csv headers
             csv.AppendLine("Session,Game,Turns,Elapsed,Winners");
@@ -41,7 +46,7 @@ namespace Tests
             Parallel.For(0, maxGames, (int i) =>
             {
                 // TODO any way to save the rules but rerun a new game?
-                var game = GameModes.FullStratego();
+                var game = GameModes.FullNewStratego();
                 game.rules.LoggingSettings = new GameRules.LogSettings()
                 {
                     logTime = true,
@@ -95,22 +100,23 @@ namespace Tests
         {
             while (true)
             {
-                var game = GameModes.FullStratego();
+                var game = GameModes.FullNewStratego();
                 game.rules.LoggingSettings = new GameRules.LogSettings()
                 {
                     logTime = false,
                     showEachPlayersPlanning = false,
                     showStatePerTurn = false,
+                    showMovePerTurn = true,
                     pausePerMove = false,
                     listMoveSeqenceAtEnd = true,
                 };
-                game.rules.MaxPhysicalTurns = 1000;
+                game.rules.MaxPhysicalTurns = 200;
 
                 Console.WriteLine("New game: ");
-                Console.WriteLine(game.CurrentBoard.ToString());
+                Console.WriteLine(game.CurrentBoard.ToAsciiLayout());
 
                 Console.WriteLine(" press enter to begin turns");
-                Console.ReadLine();
+                //Console.ReadLine();
 
                 var results = game.Run();
 
@@ -121,7 +127,7 @@ namespace Tests
                 }
 
                 Console.WriteLine("---- end of game ---- press <enter> to continue");
-                Console.ReadLine();
+                //Console.ReadLine();
             }
         }
 
@@ -133,13 +139,13 @@ namespace Tests
 
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            Game game = GameModes.FullStratego();
+            Game game = GameModes.FullNewStratego();
 
             Console.WriteLine("Board Setup: " + watch.Elapsed.TotalMilliseconds);
 
             watch.Restart();
-            Console.WriteLine(Environment.NewLine + game.CurrentBoard.ToString(true));
-            Console.WriteLine(game.CurrentBoard.ToString());
+            Console.WriteLine(Environment.NewLine + game.CurrentBoard.ToAsciiLayout(null, true));
+            Console.WriteLine(game.CurrentBoard.ToAsciiLayout());
             Console.WriteLine("Board Output: " + watch.Elapsed.TotalMilliseconds);
 
             Stopwatch totalTurnTime = Stopwatch.StartNew();
@@ -148,12 +154,15 @@ namespace Tests
             game.rules.LoggingSettings = new GameRules.LogSettings()
             {
                 logTime = true,
-                showEachPlayersPlanning = false,
+                showEachPlayersPlanning = true,
                 showStatePerTurn = true,
                 pausePerMove = false,
                 winLossReasons = true,
                 debugJumpchecks = false,
                 showMovePerTurn = true,
+                listMoveSeqenceAtEnd = true,
+                showBombDefusals = true,
+                showHiddenPieces = false,
             };
             game.rules.MaxPhysicalTurns = 600;
 
@@ -173,8 +182,9 @@ namespace Tests
 
 
 
-            Console.WriteLine("Press <enter> to quit");
-            Console.ReadLine();
+            Console.WriteLine("Press <space> to quit");
+
+            while (Console.ReadKey().Key != ConsoleKey.Spacebar) ;
         }
 
 

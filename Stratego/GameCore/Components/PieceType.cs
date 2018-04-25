@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameCore
 {
+    
     public class PieceType
     {
         public string Name { get; set; }

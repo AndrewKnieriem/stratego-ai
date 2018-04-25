@@ -8,6 +8,7 @@ using GameCore.Controllers;
 namespace GameCore
 {
     // class for both human and computer players
+    
     public class Player
     {
         public string FriendlyName { get; set; }
