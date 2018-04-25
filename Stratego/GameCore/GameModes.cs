@@ -8,16 +8,16 @@ namespace GameCore
 {
     public static class GameModes
     {
-        public static Game FullNewStratego()
+        public static Game FullNewStratego(Player p1, Player p2)
         {
             LocationType _____Space = new LocationType();
             LocationType plyr1Space = new LocationType()
             {
-                StarterPlace = playerOne,
+                StarterPlace = p1,
             };
             LocationType plyr2Space = new LocationType()
             {
-                StarterPlace = playerTwo,
+                StarterPlace = p2,
             };
 
             LocationType waterSpace = new LocationType()
@@ -35,31 +35,31 @@ namespace GameCore
             {
                 // https://en.wikipedia.org/wiki/Stratego#Pieces
                 // min, max, and start define the range of pieces a player can place to start the game
-                new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeFlag),
-                new GameRules.Arsenal(0, 6, 6, playerOne, pieceTypeBomb),
-                new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeSpy),
-                new GameRules.Arsenal(0, 8, 8, playerOne, pieceTypeScout),
-                new GameRules.Arsenal(0, 5, 5, playerOne, pieceTypeMiner),
-                new GameRules.Arsenal(0, 4, 4, playerOne, pieceType4),
-                new GameRules.Arsenal(0, 4, 4, playerOne, pieceType4),
-                new GameRules.Arsenal(0, 4, 4, playerOne, pieceType6),
-                new GameRules.Arsenal(0, 3, 3, playerOne, pieceType7),
-                new GameRules.Arsenal(0, 2, 2, playerOne, pieceType8),
-                new GameRules.Arsenal(0, 1, 1, playerOne, pieceType9),
-                new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeM),
+                new GameRules.Arsenal(0, 1, 1, p1, pieceTypeFlag),
+                new GameRules.Arsenal(0, 6, 6, p1, pieceTypeBomb),
+                new GameRules.Arsenal(0, 1, 1, p1, pieceTypeSpy),
+                new GameRules.Arsenal(0, 8, 8, p1, pieceTypeScout),
+                new GameRules.Arsenal(0, 5, 5, p1, pieceTypeMiner),
+                new GameRules.Arsenal(0, 4, 4, p1, pieceType4),
+                new GameRules.Arsenal(0, 4, 4, p1, pieceType4),
+                new GameRules.Arsenal(0, 4, 4, p1, pieceType6),
+                new GameRules.Arsenal(0, 3, 3, p1, pieceType7),
+                new GameRules.Arsenal(0, 2, 2, p1, pieceType8),
+                new GameRules.Arsenal(0, 1, 1, p1, pieceType9),
+                new GameRules.Arsenal(0, 1, 1, p1, pieceTypeM),
 
-                new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeFlag),
-                new GameRules.Arsenal(0, 6, 6, playerTwo, pieceTypeBomb),
-                new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeSpy),
-                new GameRules.Arsenal(0, 8, 8, playerTwo, pieceTypeScout),
-                new GameRules.Arsenal(0, 5, 5, playerTwo, pieceTypeMiner),
-                new GameRules.Arsenal(0, 4, 4, playerTwo, pieceType4),
-                new GameRules.Arsenal(0, 4, 4, playerTwo, pieceType4),
-                new GameRules.Arsenal(0, 4, 4, playerTwo, pieceType6),
-                new GameRules.Arsenal(0, 3, 3, playerTwo, pieceType7),
-                new GameRules.Arsenal(0, 2, 2, playerTwo, pieceType8),
-                new GameRules.Arsenal(0, 1, 1, playerTwo, pieceType9),
-                new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeM),
+                new GameRules.Arsenal(0, 1, 1, p2, pieceTypeFlag),
+                new GameRules.Arsenal(0, 6, 6, p2, pieceTypeBomb),
+                new GameRules.Arsenal(0, 1, 1, p2, pieceTypeSpy),
+                new GameRules.Arsenal(0, 8, 8, p2, pieceTypeScout),
+                new GameRules.Arsenal(0, 5, 5, p2, pieceTypeMiner),
+                new GameRules.Arsenal(0, 4, 4, p2, pieceType4),
+                new GameRules.Arsenal(0, 4, 4, p2, pieceType4),
+                new GameRules.Arsenal(0, 4, 4, p2, pieceType6),
+                new GameRules.Arsenal(0, 3, 3, p2, pieceType7),
+                new GameRules.Arsenal(0, 2, 2, p2, pieceType8),
+                new GameRules.Arsenal(0, 1, 1, p2, pieceType9),
+                new GameRules.Arsenal(0, 1, 1, p2, pieceTypeM),
             };
 
             var boardlayout = new[,]
@@ -94,19 +94,19 @@ namespace GameCore
             int countPlaced = 0;
             // place the pieces on the board
             for (int x = 0; x < 10; x++)
-            for (int y = 0; y < 10; y++)
-            {
-                var unplacedPieces = pieces.Where(q => q.Owner == boardlayout[x, y].StarterPlace && q.pos.X < 0).ToList();
+                for (int y = 0; y < 10; y++)
+                {
+                    var unplacedPieces = pieces.Where(q => q.Owner == boardlayout[x, y].StarterPlace && q.pos.X < 0).ToList();
 
-                // if the selected board location does not belong to a player
-                if (unplacedPieces.Count == 0)
-                    continue;
+                    // if the selected board location does not belong to a player
+                    if (unplacedPieces.Count == 0)
+                        continue;
 
-                // get a random piece from the collection that has not been placed yet
-                Piece randomPiece = unplacedPieces.ElementAt(rand.Next(0, unplacedPieces.Count));
-                randomPiece.pos = new CoordAbs(x, y);
-                countPlaced++;
-            }
+                    // get a random piece from the collection that has not been placed yet
+                    Piece randomPiece = unplacedPieces.ElementAt(rand.Next(0, unplacedPieces.Count));
+                    randomPiece.pos = new CoordAbs(x, y);
+                    countPlaced++;
+                }
 
             // no piece should be remaining off the board
             System.Diagnostics.Debug.Assert(!pieces.Any(q => q.pos.X < 0));
@@ -115,23 +115,23 @@ namespace GameCore
 
             GameRules rules = new GameRules(
 
-                    _arsenal: Arsenal,
+                _arsenal: Arsenal,
 
-                    _players: new List<Player>()
-                    {
-                        playerOne,
-                        playerTwo
-                    },
+                _players: new List<Player>()
+                {
+                    p1,
+                    p2
+                },
 
-                    _startingBoard: new Board()
-                    {
-                        Height = 10,
-                        Width = 10,
-                        LocationsLayout = boardlayout,
-                        PiecesLayout = new Piece[10, 10],
-                        PieceSet = pieces,
-                    }
-                )
+                _startingBoard: new Board()
+                {
+                    Height = 10,
+                    Width = 10,
+                    LocationsLayout = boardlayout,
+                    PiecesLayout = new Piece[10, 10],
+                    PieceSet = pieces,
+                }
+            )
             {
                 // Function to determine if a player automatically wins (true), lost (false), or is still active in game (null)
                 TerminalStateFunction = (theRules, board, player) =>
@@ -168,16 +168,16 @@ namespace GameCore
                     if (theRules.LoggingSettings.winLossReasons)
                     {
                         if (result == true)
-                            Console.WriteLine(player.FriendlyName + " won ... " + reason);
+                            Console.WriteLine(player + " won ... " + reason);
                         if (result == false)
-                            Console.WriteLine(player.FriendlyName + " lost ... " + reason);
+                            Console.WriteLine(player + " lost ... " + reason);
                     }
 
                     return result; // otherwise still in game
                 },
 
             };
-            
+
 
             Game game = new Game()
             {
@@ -190,24 +190,21 @@ namespace GameCore
         }
 
 
-        
+
 
 
 
         #region Common components
 
-        public static Player playerOne = new Player()
+        [Obsolete("please pass player by reference to game constructor", true)]
+        public static Player staticPlayer1 = new Player()
         {
             FriendlyName = "Player 1",
             FriendlySymbol = "+",
-            Controller = new Controllers.MonteCarloController(10)
-            {
-                ShowSubGames = false,
-                ShowSubResults = false,
-            }
+            Controller = new Controllers.RandomController(),
         };
-
-        public static Player playerTwo = new Player()
+        [Obsolete("please pass player by reference to game constructor", true)]
+        public static Player staticPlayer2 = new Player()
         {
             FriendlyName = "Player 2",
             FriendlySymbol = "-",
@@ -215,7 +212,7 @@ namespace GameCore
         };
 
 
-        
+
 
         public static PieceType pieceTypeScout = new PieceType("Scout", 2, "2")
         {
@@ -317,19 +314,19 @@ namespace GameCore
                 _arsenal: new List<GameRules.Arsenal>()
                 {
                     // min, max, and start define the range of pieces a player can place to start the game
-                    new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeBomb),
-                    new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeMiner),
-                    new GameRules.Arsenal(0, 1, 1, playerOne, pieceTypeFlag),
+                    new GameRules.Arsenal(0, 1, 1, staticPlayer1, pieceTypeBomb),
+                    new GameRules.Arsenal(0, 1, 1, staticPlayer1, pieceTypeMiner),
+                    new GameRules.Arsenal(0, 1, 1, staticPlayer1, pieceTypeFlag),
 
-                    new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeBomb),
-                    new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeMiner),
-                    new GameRules.Arsenal(0, 1, 1, playerTwo, pieceTypeFlag),
+                    new GameRules.Arsenal(0, 1, 1, staticPlayer2, pieceTypeBomb),
+                    new GameRules.Arsenal(0, 1, 1, staticPlayer2, pieceTypeMiner),
+                    new GameRules.Arsenal(0, 1, 1, staticPlayer2, pieceTypeFlag),
                 },
 
                 _players: new List<Player>()
                 {
-                    playerOne,
-                    playerTwo
+                    staticPlayer1,
+                    staticPlayer2
                 },
 
                 _startingBoard: new Board()
@@ -351,13 +348,13 @@ namespace GameCore
                          * [  +1  ,      ,  -1 ]
                          * [  +f  ,  +2  ,     ]
                          */
-                        new Piece(0, 0, playerOne, pieceTypeFlag),
-                        new Piece(1, 0, playerOne, pieceTypeMiner),
-                        new Piece(0, 1, playerOne, pieceTypeBomb),
+                        new Piece(0, 0, staticPlayer1, pieceTypeFlag),
+                        new Piece(1, 0, staticPlayer1, pieceTypeMiner),
+                        new Piece(0, 1, staticPlayer1, pieceTypeBomb),
 
-                        new Piece(2, 1, playerTwo, pieceTypeBomb),
-                        new Piece(1, 2, playerTwo, pieceTypeMiner),
-                        new Piece(2, 2, playerTwo, pieceTypeFlag)
+                        new Piece(2, 1, staticPlayer2, pieceTypeBomb),
+                        new Piece(1, 2, staticPlayer2, pieceTypeMiner),
+                        new Piece(2, 2, staticPlayer2, pieceTypeFlag)
                     }
                 }
             )

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GameCore;
+using GameCore.Controllers;
 
 namespace Tests
 {
@@ -12,41 +13,77 @@ namespace Tests
     {
         static void Main(string[] args)
         {
-            Debugs();
+            Adversarial();
         }
 
 
         static void Adversarial()
         {
             // create a matrix of comparisons of algorithms against each other
+            List<IPlayerController> Controllers = new List<IPlayerController>()
+            {
+                new RandomController(),
+                new DepthFirstController(),
+                new MonteCarloController(10, 10),
+            };
+
+            foreach (IPlayerController controller1 in Controllers)
+            foreach (IPlayerController controller2 in Controllers)
+            {
+                float winrate = CompareWins(controller1, controller2);
+                Console.WriteLine($"{controller1.GetControllerName()} vs {controller2.GetControllerName()} = {(Math.Round(winrate * 100, 2))}");
+            }
+
 
         }
 
 
-        static void CompareWins()
+        static float CompareWins(IPlayerController controller1, IPlayerController controller2, bool showGameResults = false)
         {
+            int countP1Wins = 0;
+            int countDraws = 0;
+            int maxGames = 250;
+            int maxPhysTurns = 1000;
+            
+            // since these are statics we cant parallel them without risking changing their controller midway
+            var p1 = new Player()
+            {
+                FriendlyName = "Player 1",
+                FriendlySymbol = "+",
+                Controller = controller1,
+            };
+
+            var p2 = new Player()
+            {
+                FriendlyName = "Player 2",
+                FriendlySymbol = "-",
+                Controller = controller2,
+            };
+
             Console.WriteLine("Starting simulations, please wait...");
             Stopwatch totalTime = Stopwatch.StartNew();
 
             StringBuilder csv = new StringBuilder();
-            string sessionName = "ModeFULL-AgentsRandomVsDepth-Turns2000-Games10000";
+            string sessionName = $"ModeFULL-" +
+                                 $"Agents{p1.Controller.GetControllerName()}Vs{p2.Controller.GetControllerName()}-" +
+                                 $"Turns{maxPhysTurns}-Games{maxGames}";
 
             // csv headers
-            csv.AppendLine("Session,Game,Turns,Elapsed,Winners");
-
             string SessionTimestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-
-            int countP1Wins = 0;
-            int countDraws = 0;
-            int maxGames = 10000;
+            string logfilename = $"Session_{sessionName}_{SessionTimestamp}.csv";
+            csv.AppendLine("Session,Game,Turns,Elapsed,Winners");
+            System.IO.File.AppendAllText(logfilename, csv.ToString());
 
             object statslock = new object();
 
 
-            Parallel.For(0, maxGames, (int i) =>
+            //Parallel.For(0, maxGames, (int i) =>
+            for(int i = 0; i < maxGames; i++)
             {
+                csv.Clear();
+
                 // TODO any way to save the rules but rerun a new game?
-                var game = GameModes.FullNewStratego();
+                var game = GameModes.FullNewStratego(p1, p2);
                 game.rules.LoggingSettings = new GameRules.LogSettings()
                 {
                     logTime = true,
@@ -57,7 +94,7 @@ namespace Tests
                     showMovePerTurn = false,
                     winLossReasons = false,
                 };
-                game.rules.MaxPhysicalTurns = 2000;
+                game.rules.MaxPhysicalTurns = maxPhysTurns;
 
 
                 // add custom event listeners to better integrate logging into the game events?
@@ -66,28 +103,29 @@ namespace Tests
                 
                 if (results.Winners.Count == 0)
                     countDraws++;
-                else if (results.Winners.Contains(GameModes.playerOne))
+                else if (results.Winners.Contains(p1))
                     countP1Wins++;
 
                 lock(statslock)
                     csv.AppendLine($"{SessionTimestamp},{i},{results.ToCSV()}");
 
-                //Console.WriteLine($"Wins: {countP1Wins}/{i} ({(Math.Round((countP1Wins / (float)i) * 100, 1))}%)" +
-                //                  $" Turns: {results.turnsElapsed}, Time: {results.timeElapsed.ToReadable()}");
-            });
 
+                System.IO.File.AppendAllText(logfilename, csv.ToString());
+
+                if(showGameResults)
+                    Console.WriteLine($"#{i} Turns: {results.turnsElapsed}, Time: {results.timeElapsed.ToReadable()}");
+                
+            };
 
             
-
             Console.WriteLine($"---  Sim complete, {maxGames} evaluated. Total Time: {totalTime.Elapsed.ToReadable()}");
-            Console.WriteLine($"Wins: {countP1Wins} ({(Math.Round((countP1Wins / (float)maxGames) * 100, 1))}%), Draws: {countDraws}");
+            Console.WriteLine($"Wins: {countP1Wins} ({(Math.Round((countP1Wins / (float)maxGames) * 100, 1))}%), " +
+                              $"Draws: {countDraws} ({(Math.Round((countDraws / (float)maxGames) * 100, 1))}%)");
 
-            string logfilename = $"Session_{sessionName}_{SessionTimestamp}.csv";
-            System.IO.File.WriteAllText(logfilename,csv.ToString());
-            Console.WriteLine("Wrote log to " + logfilename);
-            
-            Console.WriteLine("Press <enter> to quit...");
-            Console.ReadLine();
+            if (showGameResults)
+                Console.WriteLine("Wrote log to " + logfilename);
+
+            return countP1Wins / (float) maxGames;
         }
 
 
@@ -100,7 +138,7 @@ namespace Tests
         {
             while (true)
             {
-                var game = GameModes.FullNewStratego();
+                var game = GameModes.FullNewStratego(null, null);
                 game.rules.LoggingSettings = new GameRules.LogSettings()
                 {
                     logTime = false,
@@ -139,7 +177,7 @@ namespace Tests
 
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            Game game = GameModes.FullNewStratego();
+            Game game = GameModes.FullNewStratego(null, null);
 
             Console.WriteLine("Board Setup: " + watch.Elapsed.TotalMilliseconds);
 

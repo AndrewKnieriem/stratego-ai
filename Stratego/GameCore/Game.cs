@@ -125,9 +125,17 @@ namespace GameCore
             // in this case there is no instant win scenario
             bool stillHaspieces = board.PieceSet.Where(x => x.Owner == player).All(x => x.pos == Piece.removedPos);
             if (stillHaspieces)
+            {
+                
                 return null; // still in game
+            }
             else
+            {
+                if (rules.LoggingSettings.winLossReasons)
+                    Console.WriteLine($"{player} removed because no pieces remaining");
                 return false; // lost
+            }
+                
         };
 
 
@@ -182,6 +190,7 @@ namespace GameCore
                 BattleFunction = othergame.rules.BattleFunction,
                 LoggingSettings = othergame.rules.LoggingSettings,
                 TerminalStateFunction = othergame.rules.TerminalStateFunction,
+                MaxPhysicalTurns = othergame.rules.MaxPhysicalTurns,
             };
         }
 
@@ -203,12 +212,17 @@ namespace GameCore
 
                 // automatic forfeit if player is unable to make a move
                 if (playersMove == null)
+                {
                     rules.PlayerOrder.Remove(PlayersTurn);
+                }
                 else
+                {
                     CurrentBoard.applyMove(playersMove, rules); // apply the move
 
-                // add the move to the current game's seqence of moves
-                MoveSequence.Add(CurrentBoard.TurnNumber, playersMove);
+                    // add the move to the current game's seqence of moves
+                    MoveSequence.Add(CurrentBoard.TurnNumber, playersMove);
+                }
+                    
 
                 if (rules.LoggingSettings.showMovePerTurn)
                     Console.WriteLine($"#{CurrentBoard.TurnNumber} {playersMove}");
@@ -243,6 +257,10 @@ namespace GameCore
                 foreach (KeyValuePair<int, Move> sequence in MoveSequence)
                     Console.WriteLine($"Turn {sequence.Key} = {sequence.Value?.ToString() ?? "no move available"}");
             }
+
+            //if (CurrentBoard.TurnNumber < 2)
+            //    return null;
+
 
             return new GameResults()
             {

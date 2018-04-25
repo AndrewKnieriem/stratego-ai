@@ -56,7 +56,7 @@ namespace GameCore
         /// <param name="rules"></param>
         /// <param name="board"></param>
         /// <returns></returns>
-        public List<Player> TerminalStateCheck(GameRules rules)
+        public List<Player> TerminalStateCheck(GameRules rules) // uses the custom TerminalStateFunction on each player
         {
             List<Player> activePlayers = new List<Player>(rules.PlayerOrder);
 

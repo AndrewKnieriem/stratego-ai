@@ -67,11 +67,6 @@ namespace GameCore
                 || currentBoard.GetLocationAtCoord(ToCoord)?.Passable == false) // cannot move into obstacles
                 return false;
 
-            if ((Math.Abs(FromCoord.X - ToCoord.X) > 1 || Math.Abs(FromCoord.Y - ToCoord.Y) > 1) 
-                && movingPiece.Owner == GameModes.playerTwo
-                && rules.LoggingSettings.debugJumpchecks)
-                System.Diagnostics.Debugger.Break();
-            
             // check if theres is an empty line to the target location
             if (p.Type.CanJump == false)
             {
