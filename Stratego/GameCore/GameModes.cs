@@ -196,19 +196,19 @@ namespace GameCore
 
         #region Common components
 
-        [Obsolete("please pass player by reference to game constructor", true)]
+        [Obsolete("please pass player by reference to game constructor")]
         public static Player staticPlayer1 = new Player()
         {
             FriendlyName = "Player 1",
             FriendlySymbol = "+",
-            Controller = new Controllers.RandomController(),
+            Controller = new Controllers.ControllerRandom(),
         };
-        [Obsolete("please pass player by reference to game constructor", true)]
+        [Obsolete("please pass player by reference to game constructor")]
         public static Player staticPlayer2 = new Player()
         {
             FriendlyName = "Player 2",
             FriendlySymbol = "-",
-            Controller = new Controllers.RandomController(),
+            Controller = new Controllers.ControllerRandom(),
         };
 
 

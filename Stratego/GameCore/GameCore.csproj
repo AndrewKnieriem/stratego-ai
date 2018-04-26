@@ -43,6 +43,11 @@
     <Compile Include="Components\Board.cs" />
     <Compile Include="Components\Move.cs" />
     <Compile Include="Controllers\ControllerBase.cs" />
+    <Compile Include="Controllers\ControllerDepthFirst.cs" />
+    <Compile Include="Controllers\ControllerMinimax.cs" />
+    <Compile Include="Controllers\ControllerMonteCarlo.cs" />
+    <Compile Include="Controllers\ControllerMonteUtility.cs" />
+    <Compile Include="Controllers\ControllerRandom.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameModes.cs" />
     <Compile Include="Controllers\Minimax\Heuristic.cs" />

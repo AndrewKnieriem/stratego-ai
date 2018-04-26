@@ -13,15 +13,15 @@ namespace Tests
     {
         static void Main(string[] args)
         {
-            Adversarial();
+            HugeMonteCarlo();
         }
 
         static void HugeMonteCarlo()
         {
-            var hugeMonte = new MonteCarloController(1000, 100);
-            var rando = new RandomController();
+            var hugeMonte = new ControllerMonteUtility(10, 10);
+            var rando = new ControllerRandom();
 
-            float winrate = CompareWins(hugeMonte, rando, 100, 2000);
+            float winrate = CompareWins(hugeMonte, rando, 500, 2000, true);
             Console.WriteLine($"{hugeMonte.GetControllerName()} vs {rando.GetControllerName()} = {(Math.Round(winrate * 100, 2))}");
         }
 
@@ -30,9 +30,10 @@ namespace Tests
             // create a matrix of comparisons of algorithms against each other
             List<IPlayerController> Controllers = new List<IPlayerController>()
             {
-                new RandomController(),
-                new DepthFirstController(),
-                new MonteCarloController(10, 10),
+                new ControllerRandom(),
+                new ControllerDepthFirst(),
+                //new MonteCarloController(10, 10),
+                new ControllerMonteUtility(10,10),
             };
 
             foreach (IPlayerController controller1 in Controllers)
@@ -44,8 +45,7 @@ namespace Tests
 
 
         }
-
-
+        
         static float CompareWins(IPlayerController controller1, IPlayerController controller2, int maxgames = 250, int maxphysturns = 2000, bool showGameResults = false)
         {
             int countP1Wins = 0;
@@ -86,7 +86,7 @@ namespace Tests
 
 
             //Parallel.For(0, maxGames, (int i) =>
-            for(int i = 0; i < maxGames; i++)
+            for(int i = 1; i <= maxGames; i++)
             {
                 csv.Clear();
 
@@ -121,8 +121,13 @@ namespace Tests
                 System.IO.File.AppendAllText(logfilename, csv.ToString());
 
                 if(showGameResults)
-                    Console.WriteLine($"#{i} Turns: {results.turnsElapsed}, Time: {results.timeElapsed.ToReadable()}");
-                
+                    Console.WriteLine($"#{i} " +
+                                      $"Wins:{countP1Wins}({Math.Round((countP1Wins / (float)i) * 100, 0)}%), " +
+                                      $"Ties:{countDraws}({Math.Round((countDraws / (float)i) * 100, 0)}%), " +
+                                      $"Turns:{results.turnsElapsed}, " +
+                                      $"Time:{results.timeElapsed.ToReadable()}, " +
+                                      $"Win:{results.Winners.Contains(p1)}"); // string.Join(",", results.Winners.Select(x=>x.FriendlyName))
+
             };
 
             
@@ -135,13 +140,7 @@ namespace Tests
 
             return countP1Wins / (float) maxGames;
         }
-
-
-
-
-
-
-
+        
         static void TurnLoops()
         {
             while (true)
@@ -176,16 +175,21 @@ namespace Tests
                 //Console.ReadLine();
             }
         }
-
-
-        static void Debugs()
+        
+        static void DebugDemo()
         {
+            var MonteUtilityPlayer = new Player()
+            {
+                Controller = new ControllerMonteUtility(10,10),
+                FriendlyName = "P1MonteUtility",
+                FriendlySymbol = "+"
+            };
             // Define the simulation, board, pieces, players, and rules
             Stopwatch fullProgramTime = Stopwatch.StartNew();
 
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            Game game = GameModes.FullNewStratego(null, null);
+            Game game = GameModes.FullNewStratego(MonteUtilityPlayer, GameModes.staticPlayer2);
 
             Console.WriteLine("Board Setup: " + watch.Elapsed.TotalMilliseconds);
 
@@ -200,7 +204,7 @@ namespace Tests
             game.rules.LoggingSettings = new GameRules.LogSettings()
             {
                 logTime = true,
-                showEachPlayersPlanning = false,
+                showEachPlayersPlanning = true,
                 showStatePerTurn = true,
                 pausePerMove = true,
                 winLossReasons = true,
@@ -232,11 +236,6 @@ namespace Tests
 
             while (Console.ReadKey().Key != ConsoleKey.Spacebar) ;
         }
-
-
-
-
-
 
     }
 }
